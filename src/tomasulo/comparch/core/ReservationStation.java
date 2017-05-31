@@ -7,17 +7,13 @@ public class ReservationStation {
 
     public int pc;
 
+    public int operatorName = -1;
+
     public boolean busy = false;
 
     public int busyCountDown;
 
-    public int operatorName = -1;
-
     public double floatResult;
-
-    public double vJ;
-
-    public double vK;
 
     public ReservationStation qJ;
 
@@ -42,7 +38,7 @@ public class ReservationStation {
         busy = false;
         busyCountDown = 0;
         operatorName = -1;
-        floatResult = vJ = vK = 0;
+        floatResult = 0;
         qJ = qK = null;
         vStore = 0;
         qStore = null;

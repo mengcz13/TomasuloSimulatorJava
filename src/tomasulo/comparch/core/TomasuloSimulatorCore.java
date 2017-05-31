@@ -173,8 +173,6 @@ public class TomasuloSimulatorCore {
                         case ReservationName.ADD:
                         case ReservationName.MULT:
                             ready = !(res.qJ.busy || res.qK.busy);
-                            res.vJ = res.qJ.floatResult;
-                            res.vK = res.qK.floatResult;
                             break;
                         case ReservationName.LOAD:
                             ready = true;

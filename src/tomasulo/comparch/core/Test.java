@@ -18,6 +18,9 @@ public class Test {
         instructionList.add(new Instruction("ADDD F6,F8,F2"));
 
         TomasuloSimulatorCore tsc = new TomasuloSimulatorCore(instructionList);
-        tsc.run();
+        for (int i = 0; i < 10; ++i) {
+            tsc.run();
+            tsc.reset();
+        }
     }
 }
