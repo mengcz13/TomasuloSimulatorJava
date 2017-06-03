@@ -14,14 +14,17 @@ import java.util.*;
  */
 public class Instruction {
 
+    // 指令的运算种类
     public int op;
 
+    // 寄存器种类+序号
     public RegisterPair reg0;
 
     public RegisterPair regJ;
 
     public RegisterPair regK;
 
+    // 记录各阶段操作发生时的周期数
     public Map<Integer, Integer> record = new HashMap<Integer, Integer>();
 
     public Instruction() {
@@ -32,6 +35,7 @@ public class Instruction {
         parseInst(inst);
     }
 
+    // 解析指令字符串
     public void parseInst(String inst) {
         String[] inss = inst.split(" ");
         op = OperatorName.operatorNameMap.get(inss[0]);
@@ -58,6 +62,7 @@ public class Instruction {
         reset();
     }
 
+    // 重置指令, 这里指令内容不变, 仅清空历史记录
     public void reset() {
         for (Integer state : InstStateName.instStateNameMap.values()) {
             record.put(state, 0);

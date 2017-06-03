@@ -12,7 +12,7 @@ import tomasulo.comparch.util.name.ReservationName;
  */
 public class OperatorName {
 
-    public static final int ADDD = InstStateName.WRITERESULT;
+    public static final int ADDD = InstStateName.WRITERESULT + 1;
 
     public static final int SUBD = ADDD + 1;
 

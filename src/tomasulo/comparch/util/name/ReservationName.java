@@ -10,7 +10,7 @@ import java.util.HashMap;
  */
 public class ReservationName {
 
-    public static final int ADD = RegisterName.INSTVALUE;
+    public static final int ADD = RegisterName.INSTVALUE + 1;
 
     public static final int MULT = ADD + 1;
 
@@ -41,5 +41,15 @@ public class ReservationName {
         reservationItem.put(MULT, 2);
         reservationItem.put(LOAD, 3);
         reservationItem.put(STORE, 3);
+    }
+
+    public static final Map<Integer, Integer> maxArithmicItem;
+
+    static {
+        maxArithmicItem = new HashMap<Integer, Integer>();
+        maxArithmicItem.put(ADD, 2);
+        maxArithmicItem.put(MULT, 6);
+        maxArithmicItem.put(LOAD, Integer.MAX_VALUE);   // No limit for load and store?
+        maxArithmicItem.put(STORE, Integer.MAX_VALUE);
     }
 }

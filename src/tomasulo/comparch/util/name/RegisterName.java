@@ -8,7 +8,7 @@ import java.util.HashMap;
  */
 public class RegisterName {
 
-    public static final int FLOAT = OperatorName.ST;
+    public static final int FLOAT = OperatorName.ST + 1;
 
     public static final int INT = FLOAT + 1;
 
