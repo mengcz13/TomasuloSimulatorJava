@@ -15,25 +15,25 @@ public class TomasuloSimulatorCore {
     public static final int MEMSIZE = 4096;
 
     // 指令序列
-    private List<Instruction> instList;
+    public List<Instruction> instList;
 
     // 4种Reservation Stations
-    private Map<Integer, List<ReservationStation>> reservationStations;
+    public Map<Integer, List<ReservationStation>> reservationStations;
 
     // 浮点寄存器+整数寄存器, 浮点寄存器实质上可以看做Reservation Station的引用标记, 而整数寄存器功能简单, 故统一用Reservation Station实现
-    private Map<Integer, List<ReservationStation>> registers;
+    public Map<Integer, List<ReservationStation>> registers;
 
     // 内存单元
-    private List<Double> mem;
+    public List<Double> mem;
 
     // 指令指针
-    private int pc;
+    public int pc;
 
     // 当前周期数
-    private int clock;
+    public int clock;
 
     // 内存大小(默认为MEMSIZE)
-    private int memSize;
+    public int memSize;
 
     // 当前周期中已经执行过操作的指令, 模拟过程中用于保证一条指令在一个周期中仅会执行Issue/Exec/Writeback中的一个
     private Set<Integer> pcsInCurrentClock;
