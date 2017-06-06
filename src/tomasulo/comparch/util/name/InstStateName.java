@@ -8,7 +8,7 @@ import java.util.HashMap;
  */
 public class InstStateName {
 
-    public static final int ISSUE = 0;
+    public static final int ISSUE = ALUName.LSPipe + 1;
 
     public static final int EXECCOMP = ISSUE + 1;
 

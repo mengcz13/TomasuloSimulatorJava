@@ -42,14 +42,4 @@ public class ReservationName {
         reservationItem.put(LOAD, 3);
         reservationItem.put(STORE, 3);
     }
-
-    public static final Map<Integer, Integer> maxArithmicItem;
-
-    static {
-        maxArithmicItem = new HashMap<Integer, Integer>();
-        maxArithmicItem.put(ADD, 2);
-        maxArithmicItem.put(MULT, 6);
-        maxArithmicItem.put(LOAD, Integer.MAX_VALUE);   // No limit for load and store?
-        maxArithmicItem.put(STORE, Integer.MAX_VALUE);
-    }
 }

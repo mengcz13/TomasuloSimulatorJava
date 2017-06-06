@@ -39,7 +39,13 @@ public class TomasuloSimulatorCore {
     private Set<Integer> pcsInCurrentClock;
 
     // 当前周期中浮点运算器流水线中的指令数量
-    private Map<Integer, Integer> arithInCurrentClock;
+    // private Map<Integer, Integer> arithInCurrentClock;
+
+    // 等待进入流水线的队列, FIFO
+    private Map<Integer, LinkedList<ReservationStation>> waitingList;
+
+    // 所有运算器流水线中的等待队列, FIFO
+    private ALUPipeline aluPipeline;
 
     public TomasuloSimulatorCore() {
         this(new ArrayList<Instruction>(), MEMSIZE);
@@ -82,10 +88,12 @@ public class TomasuloSimulatorCore {
 
         pcsInCurrentClock = new HashSet<>();
 
-        arithInCurrentClock = new HashMap<>();
-        for (Map.Entry<Integer, Integer> entry : ReservationName.maxArithmicItem.entrySet()) {
-            arithInCurrentClock.put(entry.getKey(), 0);
+        waitingList = new HashMap<>();
+        for (Map.Entry<Integer, Integer> entry : ReservationName.reservationItem.entrySet()) {
+            waitingList.put(entry.getKey(), new LinkedList<>());
         }
+
+        aluPipeline = new ALUPipeline();
     }
 
     public void setInstList(List<Instruction> instList) {
@@ -113,9 +121,9 @@ public class TomasuloSimulatorCore {
             step();
             for (int i = 0; i < instList.size(); ++i) {
                 System.out.printf("%d %d %d %d\n", i,
-                        instList.get(i).record.get(0),
-                        instList.get(i).record.get(1),
-                        instList.get(i).record.get(2));
+                        instList.get(i).record.get(InstStateName.ISSUE),
+                        instList.get(i).record.get(InstStateName.EXECCOMP),
+                        instList.get(i).record.get(InstStateName.WRITERESULT));
             }
             System.out.println();
         }
@@ -149,6 +157,7 @@ public class TomasuloSimulatorCore {
                 }
             }
             if (res != null) {
+                res.reservationName = reservationName;
                 this.pcsInCurrentClock.add(pc);
                 // 解析指令, 将源操作数和目的操作数分配到Reservation Station的对应位置
                 switch (inst.op) {
@@ -178,6 +187,8 @@ public class TomasuloSimulatorCore {
                 res.busyCountDown = OperatorName.busyCountDownMap.get(inst.op);
                 res.operatorName = inst.op;
 
+                this.waitingList.get(res.reservationName).addLast(res);
+
                 inst.record.put(InstStateName.ISSUE, clock);
                 ++pc;
             }
@@ -185,13 +196,74 @@ public class TomasuloSimulatorCore {
     }
 
     private void compExec() {
+        // 对于所有的等待队列, 从前到后检测操作数是否已经准备好
+        for (Map.Entry<Integer, LinkedList<ReservationStation>> entry : this.waitingList.entrySet()) {
+            LinkedList<ReservationStation> wl = entry.getValue();
+            Iterator<ReservationStation> iter = wl.iterator();
+            while (iter.hasNext()) {
+                ReservationStation res = iter.next();
+                if (!pcsInCurrentClock.contains(res.pc)) {
+                    boolean ready = false;
+                    switch (OperatorName.operatorReservationMap.get(res.operatorName)) {    // 判断源操作数是否都已经计算完成
+                        case ReservationName.ADD:
+                        case ReservationName.MULT:
+                            ready = !(res.qJ.busy || res.qK.busy);
+                            break;
+                        case ReservationName.LOAD:
+                            ready = true;
+                            break;
+                        case ReservationName.STORE:
+                            ready = !(res.qStore.busy);
+                            break;
+                        default:
+                            break;
+                    }
+                    if (ready) {
+                        aluPipeline.add(res);
+                        iter.remove();
+                    }
+                }
+            }
+        }
+        List<ReservationStation> outress = aluPipeline.process();
+        for (ReservationStation res : outress) {
+            switch (res.operatorName) {
+                case OperatorName.ADDD:
+                    res.floatResult = res.qJ.floatResult + res.qK.floatResult;
+                    break;
+                case OperatorName.SUBD:
+                    res.floatResult = res.qJ.floatResult - res.qK.floatResult;
+                    break;
+                case OperatorName.MULTD:
+                    res.floatResult = res.qJ.floatResult * res.qK.floatResult;
+                    break;
+                case OperatorName.DIVD:
+                    if (res.qK.floatResult == 0.0) {
+                        res.floatResult = 0.0;
+                    } else {
+                        res.floatResult = res.qJ.floatResult / res.qK.floatResult;
+                    }
+                    break;
+                case OperatorName.LD:
+                    res.floatResult = this.mem.get(res.addr);
+                    break;
+                case OperatorName.ST:
+                    this.mem.set(res.addr, res.qStore.floatResult);
+                    break;
+                default:
+                    break;
+            }
+            this.pcsInCurrentClock.add(res.pc);
+            this.instList.get(res.pc).record.put(InstStateName.EXECCOMP, clock);
+        }
+        /*
         for (Map.Entry<Integer, List<ReservationStation>> entry : this.reservationStations.entrySet()) {
             int resname = entry.getKey();
             List<ReservationStation> list = entry.getValue();
             for (ReservationStation res : list) {
                 if (!pcsInCurrentClock.contains(res.pc) && res.busy) {  // 这里跳过了本周期中刚刚issue的指令占用的单元和非busy(实际上为计算完毕的常数)的单元
-                    boolean justIssued = (res.busyCountDown == OperatorName.busyCountDownMap.get(res.operatorName));    // 表示是否为上一个周期刚刚issue的指令
-                    boolean arithReady = this.arithInCurrentClock.get(resname) < ReservationName.maxArithmicItem.get(resname);  // 需要的运算器是否可以继续接收指令(由于流水线级数有限)
+                    // boolean justIssued = (res.busyCountDown == OperatorName.busyCountDownMap.get(res.operatorName));    // 表示是否为上一个周期刚刚issue的指令
+                    // boolean arithReady = this.arithInCurrentClock.get(resname) < ReservationName.maxArithmicItem.get(resname);  // 需要的运算器是否可以继续接收指令(由于流水线级数有限)
                     boolean ready = false;
                     switch (OperatorName.operatorReservationMap.get(res.operatorName)) {    // 判断源操作数是否都已经计算完成
                         case ReservationName.ADD:
@@ -255,6 +327,7 @@ public class TomasuloSimulatorCore {
                 }
             }
         }
+        */
     }
 
     private void writeBack() {  // 写回操作只需要修改Reservation Station的状态即可, 由于Java传递引用的特性, 对应位置的值会自动变化
@@ -265,8 +338,6 @@ public class TomasuloSimulatorCore {
                 ReservationStation res = iter.next();
                 if (!pcsInCurrentClock.contains(res.pc) && res.busy && res.busyCountDown == 0) {
                     res.inArithm = false;
-                    int anum = this.arithInCurrentClock.get(resname);
-                    this.arithInCurrentClock.put(resname, anum - 1);
                     res.busy = false;
                     res.operatorName = ReservationName.FLOATVALUE;
                     this.instList.get(res.pc).record.put(InstStateName.WRITERESULT, clock);
