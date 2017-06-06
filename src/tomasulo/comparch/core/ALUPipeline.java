@@ -49,8 +49,7 @@ public class ALUPipeline {
                         iter.remove();
                     }
                     if (fresh) {
-                        if (curr.busyCountDown > 0)
-                            curr.inArithm = true;
+                        curr.inArithm = true;
                         break;
                     }
                 }
@@ -82,8 +81,7 @@ public class ALUPipeline {
                     }
                     laststage = curr.stage;
                     if (fresh) {
-                        if (curr.busyCountDown > 0)
-                            curr.inArithm = true;
+                        curr.inArithm = true;
                         break;
                     }
                 }
