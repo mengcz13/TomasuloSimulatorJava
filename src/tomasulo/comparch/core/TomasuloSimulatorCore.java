@@ -108,7 +108,7 @@ public class TomasuloSimulatorCore {
 
         aluPipeline = new ALUPipeline();
 
-        this.runnable = true;
+        this.runnable = false;
     }
 
 //    public void setInstList(List<Instruction> instList) {
@@ -146,6 +146,7 @@ public class TomasuloSimulatorCore {
             }
             System.out.println();
         }
+        this.runnable = false;
     }
 
     // 每条指令执行完成后会记录完成时的周期数, 以此检查所有指令是否全部完成
@@ -181,6 +182,7 @@ public class TomasuloSimulatorCore {
         }
         this.instList = inst;
         this.reset();
+        this.runnable = true;
     }
 
     public String[][] getStateTable() {
