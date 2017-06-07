@@ -3,8 +3,6 @@ package tomasulo.comparch.util.name;
 import java.util.Map;
 import java.util.HashMap;
 
-import tomasulo.comparch.util.name.ReservationName;
-
 /**
  * Created by neozero on 17-5-31.
  *
@@ -24,19 +22,31 @@ public class OperatorName {
 
     public static final int ST = LD + 1;
 
-    public static final Map<String, Integer> operatorNameMap;
+    public static final Map<String, Integer> nameOperatorMap;
 
     static {
-        operatorNameMap = new HashMap<String, Integer>();
-        operatorNameMap.put("ADDD", ADDD);
-        operatorNameMap.put("SUBD", SUBD);
-        operatorNameMap.put("MULTD", MULTD);
-        operatorNameMap.put("DIVD", DIVD);
-        operatorNameMap.put("LD", LD);
-        operatorNameMap.put("ST", ST);
+        nameOperatorMap = new HashMap<String, Integer>();
+        nameOperatorMap.put("ADDD", ADDD);
+        nameOperatorMap.put("SUBD", SUBD);
+        nameOperatorMap.put("MULTD", MULTD);
+        nameOperatorMap.put("DIVD", DIVD);
+        nameOperatorMap.put("LD", LD);
+        nameOperatorMap.put("ST", ST);
     }
 
-    public static final int OperatorNameNum = operatorNameMap.keySet().size();
+    public static final Map<Integer, String> operatorNameMap;
+
+    static {
+        operatorNameMap = new HashMap<>();
+        operatorNameMap.put(ADDD, "ADDD");
+        operatorNameMap.put(SUBD, "SUBD");
+        operatorNameMap.put(MULTD, "MULTD");
+        operatorNameMap.put(DIVD, "DIVD");
+        operatorNameMap.put(LD, "LD");
+        operatorNameMap.put(ST, "ST");
+    }
+
+    public static final int OperatorNameNum = nameOperatorMap.keySet().size();
 
     public static final Map<Integer, Integer> busyCountDownMap;
 

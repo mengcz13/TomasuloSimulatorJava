@@ -26,6 +26,9 @@ public class TomasuloSimulatorCore {
     // 内存单元
     public List<Double> mem;
 
+    // 最近访问的内存单元
+    public List<Integer> ruMemAddr;
+
     // 指令指针
     public int pc;
 
@@ -34,6 +37,8 @@ public class TomasuloSimulatorCore {
 
     // 内存大小(默认为MEMSIZE)
     public int memSize;
+
+    public boolean runnable = false;
 
     // 当前周期中已经执行过操作的指令, 模拟过程中用于保证一条指令在一个周期中仅会执行Issue/Exec/Writeback中的一个
     private Set<Integer> pcsInCurrentClock;
@@ -70,7 +75,7 @@ public class TomasuloSimulatorCore {
         for (Map.Entry<Integer, Integer> entry : ReservationName.reservationItem.entrySet()) {
             ArrayList<ReservationStation> arrayList = new ArrayList<>(entry.getValue());
             for (int i = 0; i < entry.getValue(); ++i)
-                arrayList.add(new ReservationStation());
+                arrayList.add(new ReservationStation(i));
             reservationStations.put(entry.getKey(), arrayList);
         }
 
@@ -78,11 +83,19 @@ public class TomasuloSimulatorCore {
         for (Map.Entry<Integer, Integer> entry : RegisterName.registerItem.entrySet()) {
             ArrayList<ReservationStation> arrayList = new ArrayList<>(entry.getValue());
             for (int i = 0; i < entry.getValue(); ++i)
-                arrayList.add(new ReservationStation());
+                arrayList.add(new ReservationStation(i));
             registers.put(entry.getKey(), arrayList);
         }
 
         mem = new ArrayList<>(Collections.nCopies(memSize, 0.0));
+
+        this.ruMemAddr = new ArrayList<>();
+        for (Instruction inst : this.instList) {
+            if (inst.op == OperatorName.LD || inst.op == OperatorName.ST) {
+                int addr = inst.regJ.intValue + this.registers.get(inst.regK.name).get(inst.regK.intValue).intValue;
+                ruMemAddr.add(addr);
+            }
+        }
 
         pc = clock = 0;
 
@@ -94,25 +107,31 @@ public class TomasuloSimulatorCore {
         }
 
         aluPipeline = new ALUPipeline();
+
+        this.runnable = true;
     }
 
-    public void setInstList(List<Instruction> instList) {
-        this.instList = instList;
-        this.reset();
-    }
-
-    public List<Instruction> getInstList() {
-        return instList;
-    }
+//    public void setInstList(List<Instruction> instList) {
+//        this.instList = instList;
+//        this.reset();
+//    }
+//
+//    public List<Instruction> getInstList() {
+//        return instList;
+//    }
 
     // 单步执行
     public void step() {
-        ++clock;
-        pcsInCurrentClock.clear();
+        if (!checkFinish()) {
+            ++clock;
+            pcsInCurrentClock.clear();
 
-        issue();
-        compExec();
-        writeBack();
+            issue();
+            compExec();
+            writeBack();
+        } else {
+            this.runnable = false;
+        }
     }
 
     // 连续执行直到全部完成
@@ -140,6 +159,121 @@ public class TomasuloSimulatorCore {
         return true;
     }
 
+    // 修改内存
+    private void setMem(int addr, double newvalue) {
+        this.mem.set(addr, newvalue);
+    }
+
+    // 与UI的交互
+    public String[][] getInsTable() {
+        int insnum = this.instList.size();
+        String[][] insTable = new String[insnum][];
+        for (int i = 0; i < insnum; ++i) {
+            insTable[i] = this.instList.get(i).getText();
+        }
+        return insTable;
+    }
+
+    public void setInsTable(String[][] insTable) {
+        List<Instruction> inst = new ArrayList<>();
+        for (String[] anInsTable : insTable) {
+            inst.add(new Instruction(anInsTable));
+        }
+        this.instList = inst;
+        this.reset();
+    }
+
+    public String[][] getStateTable() {
+        String[][] stateTable = new String[this.instList.size()][];
+        for (int i = 0; i < this.instList.size(); ++i) {
+            stateTable[i] = this.instList.get(i).getState();
+        }
+        return stateTable;
+    }
+
+    public String[][] getReserveTable() {
+        int addnum = ReservationName.reservationItem.get(ReservationName.ADD);
+        int mulnum = ReservationName.reservationItem.get(ReservationName.MULT);
+        String[][] reserveTable = new String[addnum + mulnum][];
+        for (int i = 0; i < addnum; ++i) {
+            reserveTable[i] = this.reservationStations.get(ReservationName.ADD).get(i).getNormalRSText();
+        }
+        for (int i = addnum; i < addnum + mulnum; ++i) {
+            reserveTable[i] = this.reservationStations.get(ReservationName.MULT).get(i).getNormalRSText();
+        }
+        return reserveTable;
+    }
+
+    public String[][] getMemTable() {
+        String[][] memTable = new String[ruMemAddr.size()][2];
+        for (int i = 0; i < ruMemAddr.size(); ++i) {
+            memTable[i][0] = Integer.toHexString(ruMemAddr.get(i));
+            memTable[i][1] = Double.toString(mem.get(ruMemAddr.get(i)));
+        }
+        return memTable;
+    }
+
+    public void setMemTable(String[][] memTable) {
+        for (String[] aMemTable : memTable) {
+            assert aMemTable[0].substring(0, 2).equals("0x");
+            int addr = Integer.parseInt(aMemTable[0].substring(2), 16);
+            int newvalue = Integer.parseInt(aMemTable[1]);
+            this.setMem(addr, newvalue);
+        }
+    }
+
+    public String[][] getLoadTable() {
+        List<ReservationStation> loads = reservationStations.get(ReservationName.LOAD);
+        String[][] loadTable = new String[loads.size()][];
+        for (int i = 0; i < loads.size(); ++i) {
+            loadTable[i] = loads.get(i).getLoadText();
+        }
+        return loadTable;
+    }
+
+    public String[][] getStoreTable() {
+        List<ReservationStation> stores = reservationStations.get(ReservationName.STORE);
+        String[][] storeTable = new String[stores.size()][];
+        for (int i = 0; i < stores.size(); ++i) {
+            storeTable[i] = stores.get(i).getStoreText();
+        }
+        return storeTable;
+    }
+
+    public String[][] getRuTable() {
+        List<ReservationStation> rus = registers.get(RegisterName.INT);
+        String[][] ruTable = new String[rus.size()][2];
+        for (int i = 0; i < rus.size(); ++i) {
+            ruTable[i][0] = "R" + Integer.toString(rus.get(i).rank);
+            ruTable[i][1] = Integer.toString(rus.get(i).intValue);
+        }
+        return ruTable;
+    }
+
+    public void setRuTable(String[][] ruTable) {
+        for (String[] anRuTable : ruTable) {
+            assert anRuTable[0].charAt(0) == 'R';
+            int rank = Integer.parseInt(anRuTable[0].substring(1));
+            int newvalue = Integer.parseInt(anRuTable[1]);
+            this.registers.get(RegisterName.INT).get(rank).intValue = newvalue;
+        }
+    }
+
+    public String[][] getFuTable() {
+        List<ReservationStation> fus = registers.get(RegisterName.FLOAT);
+        String[][] fuTable = new String[fus.size()][3];
+        for (int i = 0; i < fus.size(); ++i) {
+            ReservationStation fu = fus.get(i);
+            fuTable[i][0] = "F" + Integer.toString(i);
+            if (fu.busy) {
+                fuTable[i][1] = ReservationName.reservationNameMap.get(fu.reservationName) + Integer.toString(fu.rank);
+            } else {
+                fuTable[i][2] = Double.toString(fu.floatResult);
+            }
+        }
+        return fuTable;
+    }
+
     // 这里利用了Java对于复杂结构传递引用的特性, 每个Reservation Station中的源操作数均为对其他Station的引用
     private void issue() {
         if (pc < instList.size()) {
@@ -149,9 +283,10 @@ public class TomasuloSimulatorCore {
             ReservationStation res = null;
             // 寻找空闲的Reservation Station, 找不到则stall, 不再继续issue
             for (ListIterator<ReservationStation> iter = lrs.listIterator(); iter.hasNext(); ) {
+                int rank = iter.nextIndex();
                 ReservationStation temp = iter.next();
                 if (!temp.busy) {   // 对于计算完成的Station, 存放的实际为具体的浮点数, 这里可以直接将其替换为新的Station, 若有其他位置引用了该浮点数则引用关系不变, 否则该浮点数会被垃圾回收
-                    res = new ReservationStation();
+                    res = new ReservationStation(rank);
                     iter.set(res);
                     break;
                 }
