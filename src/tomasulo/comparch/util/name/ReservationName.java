@@ -20,15 +20,15 @@ public class ReservationName {
 
     public static final int FLOATVALUE = STORE + 1;
 
-    public static final Map<String, Integer> reservationNameMap;
+    public static final Map<Integer, String> reservationNameMap;
 
     static {
-        reservationNameMap = new HashMap<String, Integer>();
-        reservationNameMap.put("ADD", ADD);
-        reservationNameMap.put("MULT", MULT);
-        reservationNameMap.put("LOAD", LOAD);
-        reservationNameMap.put("STORE", STORE);
-        reservationNameMap.put("FLOATVALUE", FLOATVALUE);
+        reservationNameMap = new HashMap<Integer, String>();
+        reservationNameMap.put(ADD, "ADD");
+        reservationNameMap.put(MULT, "MULT");
+        reservationNameMap.put(LOAD, "LOAD");
+        reservationNameMap.put(STORE, "STORE");
+        reservationNameMap.put(FLOATVALUE, "FLOATVALUE");
     }
 
     public static final int ReservationNameNum = reservationNameMap.keySet().size();
