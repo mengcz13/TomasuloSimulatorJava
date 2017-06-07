@@ -175,6 +175,11 @@ public class TomasuloSimulatorCore {
     }
 
     public void setInsTable(String[][] insTable) {
+        for(int i = 0; i < insTable.length; ++i) {
+            for(int j = 0; j < insTable[i].length; ++j) {
+                System.out.println(insTable[i][j]);
+            }
+        }
         List<Instruction> inst = new ArrayList<>();
         for (String[] anInsTable : insTable) {
             inst.add(new Instruction(anInsTable));
@@ -199,7 +204,7 @@ public class TomasuloSimulatorCore {
             reserveTable[i] = this.reservationStations.get(ReservationName.ADD).get(i).getNormalRSText();
         }
         for (int i = addnum; i < addnum + mulnum; ++i) {
-            reserveTable[i] = this.reservationStations.get(ReservationName.MULT).get(i).getNormalRSText();
+            reserveTable[i] = this.reservationStations.get(ReservationName.MULT).get(i - addnum).getNormalRSText();
         }
         return reserveTable;
     }

@@ -31,7 +31,7 @@ public class Adaptor implements Runnable{
 		// wait for MCZ
 		String[][] temp = core.getStateTable();
 		handle.stateTable.setData(temp);
-		temp = core.getReverseTable();
+		temp = core.getReserveTable();
 		handle.reserveTable.setData(temp);
 		temp = core.getMemTable();
 		handle.memTable.setData(temp);
@@ -57,13 +57,10 @@ public class Adaptor implements Runnable{
 						e.printStackTrace();
 					}
 				}
+				System.out.println(operation.get());
 				switch(code){
 					case SharedField.INIT:
-						engine_instruction.clear();
-						for(int i = 0; i < ui_instruction.size(); ++i){
-							engine_instruction.add(new Instruction(ui_instruction.get(i)));
-						}
-						engine.setInstList(engine_instruction);
+						engine.setInsTable(panelHandle.insTable.getData());
 						break;
 					case SharedField.RUN:
 						if(!engine.runnable){

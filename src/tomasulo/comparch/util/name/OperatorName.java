@@ -28,7 +28,7 @@ public class OperatorName {
         nameOperatorMap = new HashMap<String, Integer>();
         nameOperatorMap.put("ADDD", ADDD);
         nameOperatorMap.put("SUBD", SUBD);
-        nameOperatorMap.put("MULTD", MULTD);
+        nameOperatorMap.put("MULD", MULTD);
         nameOperatorMap.put("DIVD", DIVD);
         nameOperatorMap.put("LD", LD);
         nameOperatorMap.put("ST", ST);

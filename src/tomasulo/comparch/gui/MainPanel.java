@@ -204,22 +204,24 @@ public class MainPanel {
                 insTable.addRow(new_data);
 
             } else if (e.getSource() == delIns) {
-                Vector<Vector<String>> vec = insTable.getData();
-                if (vec.size() > 0) {
-                    vec.remove(vec.lastElement());
-                    insTable.setData(vec);
+                String[][] vec = insTable.getData();
+                String[][] new_vec = new String[vec.length - 1][];
+                for(int i = 0; i < vec.length - 1; ++i) {
+                    new_vec[i] = vec[i];
                 }
+                insTable.setData(new_vec);
 
             } else if (e.getSource() == addMem) {
                 String[] new_data = {"???", "???"};
                 memTable.addRow(new_data);
 
             } else if (e.getSource() == delMem) {
-                Vector<Vector<String>> vec = memTable.getData();
-                if (vec.size() > 0) {
-                    vec.remove(vec.lastElement());
-                    memTable.setData(vec);
+                String[][] vec = memTable.getData();
+                String[][] new_vec = new String[vec.length - 1][];
+                for(int i = 0; i < vec.length - 1; ++i) {
+                    new_vec[i] = vec[i];
                 }
+                memTable.setData(new_vec);
 
             } else if (e.getSource() == stepButton) {
                 synchronized (adaptor.operation) {

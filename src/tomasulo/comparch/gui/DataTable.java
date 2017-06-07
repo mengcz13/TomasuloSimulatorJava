@@ -44,8 +44,18 @@ public class DataTable {
         }
     }
 
-    public Vector getData() {
-        return model.getDataVector();
+    public String[][] getData() {
+        Vector<Vector<String>> vec = model.getDataVector();
+        String[][] data = new String[vec.size()][];
+        for(int i = 0; i < vec.size(); ++i) {
+            String[] sec_data = new String[vec.elementAt(i).size()];
+            for(int j = 0; j < vec.elementAt(i).size(); ++j) {
+                sec_data[j] = vec.elementAt(i).elementAt(j);
+            }
+            data[i] = sec_data;
+        }
+        return data;
+
     }
 
     public void clear() {
