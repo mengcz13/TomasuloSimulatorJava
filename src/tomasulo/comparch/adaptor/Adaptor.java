@@ -29,6 +29,20 @@ public class Adaptor implements Runnable{
 	
 	private void collectResult(TomasuloSimulatorCore core, MainPanel handle){
 		// wait for MCZ
+		String[][] temp = core.getStateTable();
+		handle.stateTable.setData(temp);
+		temp = core.getReverseTable();
+		handle.reserveTable.setData(temp);
+		temp = core.getMemTable();
+		handle.memTable.setData(temp);
+		temp = core.getLoadTable();
+		handle.loadTable.setData(temp);
+		temp = core.getStoreTable();
+		handle.storeTable.setData(temp);
+		temp = core.getRuTable();
+		handle.ruTable.setData(temp);
+		temp = core.getFuTable();
+		handle.fuTable.setData(temp);
 	}
 	
 	public void run(){
@@ -52,7 +66,9 @@ public class Adaptor implements Runnable{
 						engine.setInstList(engine_instruction);
 						break;
 					case SharedField.RUN:
-						// if not initialized?
+						if(!engine.runnable){
+							break;
+						}
 						while(!engine.checkFinish()){
 							engine.step();
 							collectResult(engine, panelHandle);
@@ -65,11 +81,14 @@ public class Adaptor implements Runnable{
 						}
 						break;
 					case SharedField.STEP:
-						// if not initialized?
+						if(!engine.runnable){
+							break;
+						}
 						engine.step();
 						collectResult(engine, panelHandle);
 						break;
 					case SharedField.SET_MEM:
+						
 						break;
 					case SharedField.SET_REG:
 						break;
