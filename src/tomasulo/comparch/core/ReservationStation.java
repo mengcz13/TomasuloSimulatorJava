@@ -14,11 +14,17 @@ public class ReservationStation {
     // 运算种类
     public int operatorName;
 
+    // 进入的运算器/读写器的种类
+    public int reservationName;
+
     // 是否繁忙, busy==false表明当前Station中为具体的浮点数(来源为初始化或已经完成的运算)
     public boolean busy = false;
 
     // 当前操作完成还剩余的周期数
     public int busyCountDown;
+
+    // 当前操作在ALU中的stage
+    public int stage;
 
     // 浮点运算结果or LOAD结果
     public double floatResult;
@@ -50,7 +56,9 @@ public class ReservationStation {
         pc = -1;
         busy = false;
         busyCountDown = 0;
+        stage = 0;
         operatorName = ReservationName.FLOATVALUE;
+        reservationName = -1;
         floatResult = 0;
         qJ = qK = null;
         inArithm = false;
