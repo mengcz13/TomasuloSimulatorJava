@@ -199,7 +199,7 @@ public class TomasuloSimulatorCore {
             reserveTable[i] = this.reservationStations.get(ReservationName.ADD).get(i).getNormalRSText();
         }
         for (int i = addnum; i < addnum + mulnum; ++i) {
-            reserveTable[i] = this.reservationStations.get(ReservationName.MULT).get(i).getNormalRSText();
+            reserveTable[i] = this.reservationStations.get(ReservationName.MULT).get(i - addnum).getNormalRSText();
         }
         return reserveTable;
     }
