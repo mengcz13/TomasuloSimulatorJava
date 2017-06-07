@@ -1,9 +1,9 @@
 package tomasulo.comparch.adaptor;
 
+import tomasulo.comparch.core.Instruction;
 import tomasulo.comparch.core.TomasuloSimulatorCore;
 import tomasulo.comparch.gui.MainPanel;
 import tomasulo.comparch.util.multithread.SharedField;
-import tomasulo.comparch.util.name
 
 import java.util.*;
 
@@ -20,6 +20,8 @@ public class Adaptor implements Runnable{
 	
 	public Adaptor(MainPanel handle, ArrayList<String> inst){
 		panelHandle = handle;
+		operation = new SharedField();
+		handle.setAdaptor(this);
 		ui_instruction = inst;
 		engine = new TomasuloSimulatorCore();
 		engine_instruction = new ArrayList<Instruction>();
@@ -35,7 +37,11 @@ public class Adaptor implements Runnable{
 		while(flag){
 			synchronized(operation){
 				while((code = operation.get()) == SharedField.IDLE){
-					operation.wait();
+					try {
+						operation.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 				switch(code){
 					case SharedField.INIT:

@@ -111,14 +111,14 @@ public class TomasuloSimulatorCore {
         this.runnable = true;
     }
 
-//    public void setInstList(List<Instruction> instList) {
-//        this.instList = instList;
-//        this.reset();
-//    }
-//
-//    public List<Instruction> getInstList() {
-//        return instList;
-//    }
+    public void setInstList(List<Instruction> instList) {
+        this.instList = instList;
+        this.reset();
+    }
+
+    public List<Instruction> getInstList() {
+        return instList;
+    }
 
     // 单步执行
     public void step() {

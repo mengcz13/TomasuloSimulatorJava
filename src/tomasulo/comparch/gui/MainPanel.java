@@ -1,6 +1,9 @@
 package tomasulo.comparch.gui;
 
 
+import tomasulo.comparch.adaptor.Adaptor;
+import tomasulo.comparch.util.multithread.SharedField;
+
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -35,6 +38,8 @@ public class MainPanel {
     private JButton loadFile;
     private JButton init;
 
+    public Adaptor adaptor;
+
     public MainPanel() {
         frame = new JFrame("tomasulo demo");
         frame.setLayout(null);
@@ -54,6 +59,10 @@ public class MainPanel {
         initButtons();
 
         frame.setVisible(true);
+    }
+
+    public void setAdaptor(Adaptor adaptor) {
+        this.adaptor = adaptor;
     }
 
     private void initTables() {
@@ -135,9 +144,15 @@ public class MainPanel {
         @Override
         public void tableChanged(TableModelEvent e) {
             if (e.getSource() == memTable) {
-
+                synchronized (adaptor.operation) {
+                    adaptor.operation.set(SharedField.SET_MEM);
+                    adaptor.operation.notify();
+                }
             } else if (e.getSource() == ruTable) {
-
+                synchronized (adaptor.operation) {
+                    adaptor.operation.set(SharedField.SET_REG);
+                    adaptor.operation.notify();
+                }
             }
         }
     };
@@ -207,9 +222,15 @@ public class MainPanel {
                 }
 
             } else if (e.getSource() == stepButton) {
-
+                synchronized (adaptor.operation) {
+                    adaptor.operation.set(SharedField.STEP);
+                    adaptor.operation.notify();
+                }
             } else if (e.getSource() == runButton) {
-
+                synchronized (adaptor.operation) {
+                    adaptor.operation.set(SharedField.RUN);
+                    adaptor.operation.notify();
+                }
             } else if (e.getSource() == loadFile) {
                 JFileChooser fc = new JFileChooser();
                 fc.setDialogTitle("请选择指令文件");
@@ -248,8 +269,11 @@ public class MainPanel {
 
                     }
                 }
-            } else if(e.getSource() == init) {
-
+            } else if (e.getSource() == init) {
+                synchronized (adaptor.operation) {
+                    adaptor.operation.set(SharedField.INIT);
+                    adaptor.operation.notify();
+                }
             }
         }
 

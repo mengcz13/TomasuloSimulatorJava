@@ -1,5 +1,6 @@
 package tomasulo.comparch.core;
 
+import tomasulo.comparch.adaptor.Adaptor;
 import tomasulo.comparch.gui.MainPanel;
 
 import java.util.ArrayList;
@@ -11,20 +12,11 @@ import java.util.List;
 public class Test {
 
     public static void main(String[] args) {
-
         MainPanel panel = new MainPanel();
-        List<Instruction> instructionList = new ArrayList<Instruction>();
-        instructionList.add(new Instruction("LD F6,34,R2"));
-        instructionList.add(new Instruction("LD F2,45,R3"));
-        instructionList.add(new Instruction("MULTD F0,F2,F2"));
-        instructionList.add(new Instruction("SUBD F8,F6,F2"));
-        instructionList.add(new Instruction("DIVD F10,F0,F6"));
-        instructionList.add(new Instruction("ADDD F6,F8,F2"));
+        ArrayList<String> al = new ArrayList<>();
+        Adaptor ad = new Adaptor(panel, al);
 
-        TomasuloSimulatorCore tsc = new TomasuloSimulatorCore(instructionList);
-        for (int i = 0; i < 10; ++i) {
-            tsc.run();
-            tsc.reset();
-        }
+        Thread thread = new Thread(ad);
+        thread.start();
     }
 }
