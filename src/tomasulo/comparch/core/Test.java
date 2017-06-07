@@ -1,5 +1,7 @@
 package tomasulo.comparch.core;
 
+import tomasulo.comparch.gui.MainPanel;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +11,8 @@ import java.util.List;
 public class Test {
 
     public static void main(String[] args) {
+
+        MainPanel panel = new MainPanel();
         List<Instruction> instructionList = new ArrayList<Instruction>();
         instructionList.add(new Instruction("LD F6,34,R2"));
         instructionList.add(new Instruction("LD F2,45,R3"));

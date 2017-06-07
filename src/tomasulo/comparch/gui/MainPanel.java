@@ -1,12 +1,11 @@
-package gui;
+package tomasulo.comparch.gui;
 
-import com.sun.org.apache.bcel.internal.generic.INSTANCEOF;
 
 import javax.swing.*;
-import javax.xml.crypto.Data;
-import java.awt.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
 import java.util.Vector;
 
 /**
@@ -31,6 +30,7 @@ public class MainPanel {
     private JButton delMem;
     private JButton stepButton;
     private JButton runButton;
+    private JButton loadFile;
 
     public MainPanel() {
         frame = new JFrame("tomasulo demo");
@@ -133,6 +133,7 @@ public class MainPanel {
         delMem = new JButton("-");
         stepButton = new JButton("单步执行");
         runButton = new JButton("连续执行");
+        loadFile = new JButton("读取指令文本");
 
 
         frame.getContentPane().add(addIns);
@@ -141,6 +142,7 @@ public class MainPanel {
         frame.getContentPane().add(delMem);
         frame.getContentPane().add(stepButton);
         frame.getContentPane().add(runButton);
+        frame.getContentPane().add(loadFile);
 
         addIns.setBounds(160, 15, 18, 18);
         delIns.setBounds(180, 15, 18, 18);
@@ -148,59 +150,99 @@ public class MainPanel {
         delMem.setBounds(180, 210, 18, 18);
         stepButton.setBounds(500, 400, 100, 40);
         runButton.setBounds(650, 400, 100, 40);
+        loadFile.setBounds(500, 500, 100, 40);
 
-        addIns.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        addIns.addActionListener(al);
+        delIns.addActionListener(al);
+        addMem.addActionListener(al);
+        delMem.addActionListener(al);
+        stepButton.addActionListener(al);
+        runButton.addActionListener(al);
+        loadFile.addActionListener(al);
+    }
+
+    public ActionListener al = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == addIns) {
                 String[] new_data = {"???", "???", "???", "???"};
                 insTable.addRow(new_data);
-            }
-        });
 
-        delIns.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+            } else if (e.getSource() == delIns) {
                 Vector<Vector<String>> vec = insTable.getData();
                 if (vec.size() > 0) {
                     vec.remove(vec.lastElement());
                     insTable.setData(vec);
                 }
 
-            }
-        });
-
-        addMem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+            } else if (e.getSource() == addMem) {
                 String[] new_data = {"???", "???"};
                 memTable.addRow(new_data);
-            }
-        });
 
-        delMem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+            } else if (e.getSource() == delMem) {
                 Vector<Vector<String>> vec = memTable.getData();
                 if (vec.size() > 0) {
                     vec.remove(vec.lastElement());
                     memTable.setData(vec);
                 }
-            }
-        });
 
-        stepButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+            } else if (e.getSource() == stepButton) {
 
-            }
-        });
+            } else if (e.getSource() == runButton) {
 
-        runButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
+            } else if (e.getSource() == loadFile) {
+                JFileChooser fc = new JFileChooser();
+                fc.setDialogTitle("请选择指令文件");
+                fc.setFileFilter(new FileNameExtensionFilter("文本文件(\".txt\")", "txt"));
+                int retVal = fc.showOpenDialog(frame);
+                if (retVal == JFileChooser.APPROVE_OPTION) {
+                    File file = fc.getSelectedFile();
+                    if (file.isFile() && file.exists()) {
+                        try {
+                            InputStreamReader read = new InputStreamReader(
+                                    new FileInputStream(file));
+                            BufferedReader bufferedReader = new BufferedReader(read);
+                            String lineTxt;
+                            Vector<String[]> vec = new Vector<>();
+                            while ((lineTxt = bufferedReader.readLine()) != null) {
+                                String[] data = lineTxt.split(" ");
+                                if (!isGoodInstruction(data)) {
+                                    throw new IOException();
+                                }
+                                vec.add(data);
+                            }
+                            String[][] data = new String[vec.size()][];
+                            for (int i = 0; i < vec.size(); ++i) {
+                                data[i] = vec.elementAt(i);
+                            }
+                            insTable.setData(data);
+                            read.close();
+                        } catch (IOException error) {
+                            JOptionPane.showMessageDialog(null,
+                                    "请选择正确的文件！",
+                                    "文件错误",
+                                    JOptionPane.ERROR_MESSAGE);
+
+                            error.printStackTrace();
+                        }
+
+                    }
+                }
             }
-        });
+        }
+
+    };
+
+    private boolean isGoodInstruction(String[] data) {
+        if (data.length != 4) return false;
+        if (data[0].equals("ADDD")
+                || data[0].equals("SUBD")
+                || data[0].equals("MULD")
+                || data[0].equals("DIVD")
+                || data[0].equals("LD")
+                || data[0].equals("ST")) {
+            return true;
+        }
+        return false;
     }
-
 }
