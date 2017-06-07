@@ -75,7 +75,7 @@ public class TomasuloSimulatorCore {
         for (Map.Entry<Integer, Integer> entry : ReservationName.reservationItem.entrySet()) {
             ArrayList<ReservationStation> arrayList = new ArrayList<>(entry.getValue());
             for (int i = 0; i < entry.getValue(); ++i)
-                arrayList.add(new ReservationStation(i));
+                arrayList.add(new ReservationStation(entry.getKey(), i));
             reservationStations.put(entry.getKey(), arrayList);
         }
 
@@ -83,7 +83,7 @@ public class TomasuloSimulatorCore {
         for (Map.Entry<Integer, Integer> entry : RegisterName.registerItem.entrySet()) {
             ArrayList<ReservationStation> arrayList = new ArrayList<>(entry.getValue());
             for (int i = 0; i < entry.getValue(); ++i)
-                arrayList.add(new ReservationStation(i));
+                arrayList.add(new ReservationStation(-1, i));
             registers.put(entry.getKey(), arrayList);
         }
 
@@ -288,7 +288,7 @@ public class TomasuloSimulatorCore {
                 int rank = iter.nextIndex();
                 ReservationStation temp = iter.next();
                 if (!temp.busy) {   // 对于计算完成的Station, 存放的实际为具体的浮点数, 这里可以直接将其替换为新的Station, 若有其他位置引用了该浮点数则引用关系不变, 否则该浮点数会被垃圾回收
-                    res = new ReservationStation(rank);
+                    res = new ReservationStation(reservationName, rank);
                     iter.set(res);
                     break;
                 }
