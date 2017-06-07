@@ -1,8 +1,8 @@
 package tomasulo.comparch.gui;
 
 import javax.swing.*;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
 import java.util.Vector;
 
 /**
@@ -13,6 +13,7 @@ public class DataTable {
     private JTable table;
     private DefaultTableModel model;
     private String[] header;
+    private TableModelListener listener = null;
 
     public DataTable() {
         table = new JTable();
@@ -51,6 +52,9 @@ public class DataTable {
         table.removeAll();
         model = new DefaultTableModel();
         table.setModel(model);
+        if(listener != null) {
+            model.addTableModelListener(listener);
+        }
         setHeader(header);
     }
 
@@ -59,12 +63,13 @@ public class DataTable {
     }
 
     public void setBounds(int x, int y, int width, int height) {
-        //table.setPreferredScrollableViewportSize(new Dimension(width,height));
-        //table.setLocation(x, y);
         table.setBounds(x, y, width, height);
     }
 
     public void addRow(String[] data) {
         model.addRow(data);
+    }
+    public void setListener(TableModelListener ml) {
+        this.listener = ml;
     }
 }

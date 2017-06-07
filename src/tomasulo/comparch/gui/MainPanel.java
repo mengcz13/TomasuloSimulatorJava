@@ -2,6 +2,8 @@ package tomasulo.comparch.gui;
 
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,6 +33,7 @@ public class MainPanel {
     private JButton stepButton;
     private JButton runButton;
     private JButton loadFile;
+    private JButton init;
 
     public MainPanel() {
         frame = new JFrame("tomasulo demo");
@@ -95,6 +98,7 @@ public class MainPanel {
         String[] memColumn = {"Addr", "Data"};
         String[][] memData = {};
         initTable(memTable, memColumn, memData, "内存单元", 25, 230, 200, 100);
+        memTable.setListener(ml);
         //set memTable
 
         String[] ruColumn = {"寄存器号", "数据"};
@@ -102,6 +106,7 @@ public class MainPanel {
                 {"R4", ""}, {"R5", ""}, {"R6", ""}, {"R7", ""},
                 {"R8", ""}, {"R9", ""}, {"R10", ""}};
         initTable(ruTable, ruColumn, ruData, "整型寄存器", 25, 360, 150, 200);
+        ruTable.setListener(ml);
         //set ruTable
 
         String[] fuColumn = {"寄存器号", "表达式", "数据"};
@@ -126,6 +131,17 @@ public class MainPanel {
         label.setBounds(x + (int) (0.38 * width), y - 25, 100, 30);
     }
 
+    public TableModelListener ml = new TableModelListener() {
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            if (e.getSource() == memTable) {
+
+            } else if (e.getSource() == ruTable) {
+
+            }
+        }
+    };
+
     private void initButtons() {
         addIns = new JButton("+");
         delIns = new JButton("-");
@@ -134,6 +150,7 @@ public class MainPanel {
         stepButton = new JButton("单步执行");
         runButton = new JButton("连续执行");
         loadFile = new JButton("读取指令文本");
+        init = new JButton("初始化数据");
 
 
         frame.getContentPane().add(addIns);
@@ -143,6 +160,7 @@ public class MainPanel {
         frame.getContentPane().add(stepButton);
         frame.getContentPane().add(runButton);
         frame.getContentPane().add(loadFile);
+        frame.getContentPane().add(init);
 
         addIns.setBounds(160, 15, 18, 18);
         delIns.setBounds(180, 15, 18, 18);
@@ -151,6 +169,7 @@ public class MainPanel {
         stepButton.setBounds(500, 400, 100, 40);
         runButton.setBounds(650, 400, 100, 40);
         loadFile.setBounds(500, 500, 100, 40);
+        init.setBounds(650, 500, 100, 40);
 
         addIns.addActionListener(al);
         delIns.addActionListener(al);
@@ -159,6 +178,7 @@ public class MainPanel {
         stepButton.addActionListener(al);
         runButton.addActionListener(al);
         loadFile.addActionListener(al);
+        init.addActionListener(al);
     }
 
     public ActionListener al = new ActionListener() {
@@ -228,6 +248,8 @@ public class MainPanel {
 
                     }
                 }
+            } else if(e.getSource() == init) {
+
             }
         }
 
