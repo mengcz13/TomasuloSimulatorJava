@@ -1,33 +1,31 @@
 package tomasulo.comparch.adaptor;
 
 import tomasulo.comparch.core.TomasuloSimulatorCore;
-import tomasulo.comparch.UI.MainPanel;	// assumed path
+import tomasulo.comparch.gui.MainPanel;
+import tomasulo.comparch.util.multithread.SharedField;
+import tomasulo.comparch.util.name
 
 import java.util.*;
 
-class SharedField{
-	private int value;
-	public static final int IDLE = 0;
-	public static final int TERMINATE = 1;
-	public static final int STEP = 2;
-	public static final int RUN = 3;
-	public void set(int v){
-		value = v;
-	}
-	public int get(){
-		return value;
-	}
-}
+
 
 public class Adaptor implements Runnable{
 	private MainPanel panelHandle;
 	private TomasuloSimulatorCore engine;
 	
 	public SharedField operation;
+	public ArrayList<String> ui_instruction;
+	public ArrayList<Instruction> engine_instruction;
 	
 	
-	public Adaptor(MainPanel handle){
+	public Adaptor(MainPanel handle, ArrayList<String> inst){
 		panelHandle = handle;
+		ui_instruction = inst;
+		engine = new TomasuloSimulatorCore();
+	}
+	
+	private void collectResult(TomasuloSimulatorCore core, MainPanel handle){
+		// wait for MCZ
 	}
 	
 	public void run(){
@@ -40,13 +38,37 @@ public class Adaptor implements Runnable{
 				}
 			}
 			switch(code){
+				case SharedField.INIT:
+					engine_instruction.clear();
+					for(int i = 0; i < ui_instruction.size(); ++i){
+						engine_instruction.add(new Instruction(ui_instruction.get(i)));
+					}
+					engine.setInstList(engine_instruction);
+					break;
 				case SharedField.RUN:
+					// if not initialized?
+					while(!engine.checkFinish()){
+						engine.step();
+						collectResult(engine, panelHandle);
+						try{
+							Thread.sleep(1000);
+						}
+						catch(InterruptedException e){
+							
+						}
+					}
 					break;
 				case SharedField.STEP:
+					// if not initialized?
+					engine.step();
+					collectResult(engine, panelHandle);
 					break;
 				case SharedField.TERMINATE:
 					flag = false;
 					break;
+			}
+			synchronized(operation){
+				operation.set(SharedField.IDLE);
 			}
 		}
 	}
