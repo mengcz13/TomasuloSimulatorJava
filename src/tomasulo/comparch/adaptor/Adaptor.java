@@ -57,7 +57,6 @@ public class Adaptor implements Runnable{
 						e.printStackTrace();
 					}
 				}
-				System.out.println(operation.get());
 				switch(code){
 					case SharedField.INIT:
 						engine.setInsTable(panelHandle.insTable.getData());

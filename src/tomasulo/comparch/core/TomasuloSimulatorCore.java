@@ -75,7 +75,7 @@ public class TomasuloSimulatorCore {
         for (Map.Entry<Integer, Integer> entry : ReservationName.reservationItem.entrySet()) {
             ArrayList<ReservationStation> arrayList = new ArrayList<>(entry.getValue());
             for (int i = 0; i < entry.getValue(); ++i)
-                arrayList.add(new ReservationStation(i));
+                arrayList.add(new ReservationStation(entry.getKey(), i));
             reservationStations.put(entry.getKey(), arrayList);
         }
 
@@ -83,7 +83,7 @@ public class TomasuloSimulatorCore {
         for (Map.Entry<Integer, Integer> entry : RegisterName.registerItem.entrySet()) {
             ArrayList<ReservationStation> arrayList = new ArrayList<>(entry.getValue());
             for (int i = 0; i < entry.getValue(); ++i)
-                arrayList.add(new ReservationStation(i));
+                arrayList.add(new ReservationStation(-1, i));
             registers.put(entry.getKey(), arrayList);
         }
 
@@ -108,7 +108,7 @@ public class TomasuloSimulatorCore {
 
         aluPipeline = new ALUPipeline();
 
-        this.runnable = true;
+        this.runnable = false;
     }
 
     public void setInstList(List<Instruction> instList) {
@@ -146,6 +146,7 @@ public class TomasuloSimulatorCore {
             }
             System.out.println();
         }
+        this.runnable = false;
     }
 
     // 每条指令执行完成后会记录完成时的周期数, 以此检查所有指令是否全部完成
@@ -175,17 +176,13 @@ public class TomasuloSimulatorCore {
     }
 
     public void setInsTable(String[][] insTable) {
-        for(int i = 0; i < insTable.length; ++i) {
-            for(int j = 0; j < insTable[i].length; ++j) {
-                System.out.println(insTable[i][j]);
-            }
-        }
         List<Instruction> inst = new ArrayList<>();
         for (String[] anInsTable : insTable) {
             inst.add(new Instruction(anInsTable));
         }
         this.instList = inst;
         this.reset();
+        this.runnable = true;
     }
 
     public String[][] getStateTable() {
@@ -291,7 +288,7 @@ public class TomasuloSimulatorCore {
                 int rank = iter.nextIndex();
                 ReservationStation temp = iter.next();
                 if (!temp.busy) {   // 对于计算完成的Station, 存放的实际为具体的浮点数, 这里可以直接将其替换为新的Station, 若有其他位置引用了该浮点数则引用关系不变, 否则该浮点数会被垃圾回收
-                    res = new ReservationStation(rank);
+                    res = new ReservationStation(reservationName, rank);
                     iter.set(res);
                     break;
                 }

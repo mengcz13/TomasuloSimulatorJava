@@ -51,9 +51,10 @@ public class ReservationStation {
     // 作为整数寄存器使用时用于存储值
     public int intValue;
 
-    public ReservationStation(int rank) {
-        this.rank = rank;
+    public ReservationStation(int reservationName, int rank) {
         reset();
+        this.rank = rank;
+        this.reservationName = reservationName;
     }
 
     public void reset() {
