@@ -67,9 +67,10 @@ public class MainPanel {
     private JButton runButton;
     private JButton loadFile;
     private JButton init;
-
+    private JButton setDefault;
 
     public Adaptor adaptor;
+
 
     public MainPanel() {
         frame = new JFrame("Tomasulo Demo");
@@ -144,7 +145,6 @@ public class MainPanel {
                 200, 360, 180, 200);
         //set fuTable
 
-        fuTable.getTable().setEnabled(false);
         reserveTable.getTable().setEnabled(false);
         storeTable.getTable().setEnabled(false);
         loadTable.getTable().setEnabled(false);
@@ -153,7 +153,6 @@ public class MainPanel {
 
     private void initTable(DataTable table, String[] column, String[][] data, String title,
                            int x, int y, int width, int height) {
-
         if (!table.isAdded()) {
             table.setHeader(column);
             JScrollPane sp = new JScrollPane(table.getTable());
@@ -169,27 +168,6 @@ public class MainPanel {
         table.setData(data);
     }
 
-    public TableModelListener ml = new TableModelListener() {
-        @Override
-        public void tableChanged(TableModelEvent e) {
-            if (e.getSource() == memTable) {
-                if (checkMemLegality(e)) {
-                    synchronized (adaptor.operation) {
-                        adaptor.operation.set(SharedField.SET_MEM);
-                        adaptor.operation.notify();
-                    }
-                }
-            } else if (e.getSource() == ruTable) {
-                if (checkRegLegality(e)) {
-                    synchronized (adaptor.operation) {
-                        adaptor.operation.set(SharedField.SET_REG);
-                        adaptor.operation.notify();
-                    }
-                }
-            }
-        }
-    };
-
     private void initButtons() {
         addIns = new JButton("+");
         delIns = new JButton("-");
@@ -199,6 +177,7 @@ public class MainPanel {
         runButton = new JButton("连续执行");
         loadFile = new JButton("读取指令文本");
         init = new JButton("初始化数据");
+        setDefault = new JButton("恢复默认参数");
 
 
         frame.getContentPane().add(addIns);
@@ -209,15 +188,17 @@ public class MainPanel {
         frame.getContentPane().add(runButton);
         frame.getContentPane().add(loadFile);
         frame.getContentPane().add(init);
+        frame.getContentPane().add(setDefault);
 
         addIns.setBounds(160, 15, 18, 18);
         delIns.setBounds(180, 15, 18, 18);
         addMem.setBounds(160, 210, 18, 18);
         delMem.setBounds(180, 210, 18, 18);
-        stepButton.setBounds(500, 400, 100, 40);
-        runButton.setBounds(650, 400, 100, 40);
-        loadFile.setBounds(500, 500, 100, 40);
-        init.setBounds(650, 500, 100, 40);
+        setDefault.setBounds(500, 400, 100, 40);
+        stepButton.setBounds(500, 450, 100, 40);
+        runButton.setBounds(500, 500, 100, 40);
+        loadFile.setBounds(650, 400, 100, 40);
+        init.setBounds(650, 450, 100, 40);
 
         addIns.addActionListener(al);
         delIns.addActionListener(al);
@@ -227,6 +208,7 @@ public class MainPanel {
         runButton.addActionListener(al);
         loadFile.addActionListener(al);
         init.addActionListener(al);
+        setDefault.addActionListener(al);
 
         stepButton.setEnabled(false);
         runButton.setEnabled(false);
@@ -284,7 +266,7 @@ public class MainPanel {
                 }
             } else if (e.getSource() == init) {
                 if (checkLegality()) {
-                    initTables();
+                    clock.clear();
                     stepButton.setEnabled(true);
                     runButton.setEnabled(true);
                     synchronized (adaptor.operation) {
@@ -292,9 +274,33 @@ public class MainPanel {
                         adaptor.operation.notify();
                     }
                 }
+            } else if(e.getSource() == setDefault) {
+                initTables();
             }
         }
+    };
 
+    public TableModelListener ml = new TableModelListener() {
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            if (e.getSource() == memTable) {
+                if (checkMemLegality(e)) {
+                    synchronized (adaptor.operation) {
+                        adaptor.operation.set(SharedField.SET_MEM);
+                        adaptor.operation.notify();
+                    }
+                }
+            } else if (e.getSource() == ruTable) {
+                if (checkRegLegality(e)) {
+                    synchronized (adaptor.operation) {
+                        adaptor.operation.set(SharedField.SET_REG);
+                        adaptor.operation.notify();
+                    }
+                }
+            } else if(e.getSource() == fuTable) {
+                
+            }
+        }
     };
 
     private boolean isGoodInstruction(String[] data) {
@@ -311,7 +317,6 @@ public class MainPanel {
     }
 
     private boolean checkLegality() {
-
         return true;
     }
 
@@ -322,6 +327,10 @@ public class MainPanel {
 
     private boolean checkRegLegality(TableModelEvent e) {
         return true;
+    }
+
+    private boolean checkFuLegality(TableModelEvent e) {
+
     }
 
     private String[][] loadFileData() throws IOException {
