@@ -73,6 +73,8 @@ public class MainPanel {
     private JButton loadFile;
     private JButton init;
     private JButton setDefault;
+    private JButton stepnButton;
+    public JTextField textField;
 
     public Adaptor adaptor;
 
@@ -102,6 +104,7 @@ public class MainPanel {
         initTables(false);
         initButtons();
         initLabels();
+        initTextField();
 
         updateState();
 
@@ -114,6 +117,11 @@ public class MainPanel {
 
     public void terminate() {
         proState = SETTING;
+        updateState();
+    }
+
+    public void restoreFree() {
+        proState = INITTED;
         updateState();
     }
 
@@ -195,8 +203,9 @@ public class MainPanel {
         stepButton = new JButton("单步执行");
         runButton = new JButton("执行到底");
         loadFile = new JButton("读取指令文本");
-        init = new JButton("初始化数据");
+        init = new JButton("应用");
         setDefault = new JButton("使用默认数据");
+        stepnButton = new JButton("连续执行n步");
 
 
         frame.getContentPane().add(addIns);
@@ -208,6 +217,7 @@ public class MainPanel {
         frame.getContentPane().add(loadFile);
         frame.getContentPane().add(init);
         frame.getContentPane().add(setDefault);
+        frame.getContentPane().add(stepnButton);
 
         addIns.setBounds(160, 15, 18, 18);
         delIns.setBounds(180, 15, 18, 18);
@@ -218,6 +228,7 @@ public class MainPanel {
         runButton.setBounds(510, 510, 100, 40);
         loadFile.setBounds(510, 350, 100, 40);
         init.setBounds(450, 430, 100, 40);
+        stepnButton.setBounds(620, 510, 100, 40);
 
         addIns.addActionListener(al);
         delIns.addActionListener(al);
@@ -228,6 +239,7 @@ public class MainPanel {
         loadFile.addActionListener(al);
         init.addActionListener(al);
         setDefault.addActionListener(al);
+        stepnButton.addActionListener(al);
     }
 
     private void initLabels() {
@@ -239,6 +251,12 @@ public class MainPanel {
                 labels[i * 2 + j].setBounds(460 + j * 70, 400 + i * 80, 20, 20);
             }
         }
+    }
+
+    private void initTextField() {
+        textField = new JTextField();
+        frame.getContentPane().add(textField);
+        textField.setBounds(650, 480, 40, 20);
     }
 
     private ActionListener al = new ActionListener() {
@@ -321,6 +339,23 @@ public class MainPanel {
 
             } else if (e.getSource() == setDefault) {
                 initTables(true);
+            } else if (e.getSource() == stepnButton) {
+                String text = textField.getText();
+                try {
+                    int stepVal = Integer.parseInt(text);
+                    if (stepVal <= 0) throw new Exception();
+                    proState = RUNNING;
+                    updateState();
+                    synchronized (adaptor.operation) {
+                        adaptor.operation.set(SharedField.STEPN);
+                        adaptor.operation.notify();
+                    }
+                } catch (Exception error) {
+                    JOptionPane.showMessageDialog(null,
+                            "请输入正确的步数！",
+                            "步数错误",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     };
@@ -328,7 +363,6 @@ public class MainPanel {
     private TableModelListener ml = new TableModelListener() {
         @Override
         public void tableChanged(TableModelEvent e) {
-            System.out.println("listen changed");
             if (proState == INITTED) {
                 synchronized (adaptor.operation) {
                     System.out.println("set mem");
@@ -404,16 +438,19 @@ public class MainPanel {
         if (proState == SETTING) {
             stepButton.setEnabled(false);
             runButton.setEnabled(false);
+            stepnButton.setEnabled(false);
             setDefault.setEnabled(true);
             loadFile.setEnabled(true);
             init.setEnabled(true);
         } else if (proState == INITTED) {
             stepButton.setEnabled(true);
             runButton.setEnabled(true);
+            stepnButton.setEnabled(true);
             setDefault.setEnabled(false);
             loadFile.setEnabled(false);
             init.setEnabled(false);
         } else if (proState == RUNNING) {
+            stepnButton.setEnabled(false);
             stepButton.setEnabled(false);
             runButton.setEnabled(false);
             setDefault.setEnabled(false);

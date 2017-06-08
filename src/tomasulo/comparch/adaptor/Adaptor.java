@@ -72,10 +72,30 @@ public class Adaptor implements Runnable {
                             try {
                                 Thread.sleep(1000);
                             } catch (InterruptedException e) {
-
                             }
                         }
                         panelHandle.terminate();
+                        break;
+                    case SharedField.STEPN:
+                        if (!engine.runnable) {
+                            break;
+                        }
+                        int count = 0;
+                        int stepVal = Integer.parseInt(panelHandle.textField.getText());
+                        while (count < stepVal && !engine.checkFinish()) {
+                            engine.step();
+                            collectResult(engine, panelHandle);
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                            }
+                            count++;
+                        }
+                        if(engine.checkFinish()) {
+                            panelHandle.terminate();
+                        } else {
+                            panelHandle.restoreFree();
+                        }
                         break;
                     case SharedField.STEP:
                         if (!engine.runnable) {
@@ -83,7 +103,7 @@ public class Adaptor implements Runnable {
                         }
                         engine.step();
                         collectResult(engine, panelHandle);
-                        if(engine.checkFinish()) {
+                        if (engine.checkFinish()) {
                             panelHandle.terminate();
                         }
                         break;
@@ -94,7 +114,7 @@ public class Adaptor implements Runnable {
                         engine.setMemTable(panelHandle.memTable.getData());
                         break;
                     case SharedField.SET_REG:
-                        if(!engine.runnable) {
+                        if (!engine.runnable) {
                             break;
                         }
                         engine.setRuTable(panelHandle.ruTable.getData());
