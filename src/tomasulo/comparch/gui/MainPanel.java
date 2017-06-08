@@ -88,7 +88,7 @@ public class MainPanel {
 
         clock = new Clock();
         frame.getContentPane().add(clock);
-        clock.show();
+        clock.update();
         clock.setBounds(600, 450, 50, 50);
 
         initTables();
@@ -144,25 +144,29 @@ public class MainPanel {
                 200, 360, 180, 200);
         //set fuTable
 
-        fuTable.table().setEnabled(false);
-        reserveTable.table().setEnabled(false);
-        storeTable.table().setEnabled(false);
-        loadTable.table().setEnabled(false);
-        stateTable.table().setEnabled(false);
+        fuTable.getTable().setEnabled(false);
+        reserveTable.getTable().setEnabled(false);
+        storeTable.getTable().setEnabled(false);
+        loadTable.getTable().setEnabled(false);
+        stateTable.getTable().setEnabled(false);
     }
 
     private void initTable(DataTable table, String[] column, String[][] data, String title,
                            int x, int y, int width, int height) {
-        table.setHeader(column);
-        table.setData(data);
-        JScrollPane sp = new JScrollPane(table.table());
-        sp.setBounds(x, y, width, height);
-        frame.getContentPane().add(sp);
 
-        JLabel label = new JLabel();
-        label.setText(title);
-        frame.getContentPane().add(label);
-        label.setBounds(x + (int) (0.38 * width), y - 25, 100, 30);
+        if (!table.isAdded()) {
+            table.setHeader(column);
+            JScrollPane sp = new JScrollPane(table.getTable());
+            sp.setBounds(x, y, width, height);
+            frame.getContentPane().add(sp);
+            table.setText(title);
+            table.setData(data);
+            frame.getContentPane().add(table.getLabel());
+            table.getLabel().setBounds(x + (int) (0.38 * width), y - 25, 100, 30);
+            table.add();
+            return;
+        }
+        table.setData(data);
     }
 
     public TableModelListener ml = new TableModelListener() {
@@ -280,7 +284,7 @@ public class MainPanel {
                 }
             } else if (e.getSource() == init) {
                 if (checkLegality()) {
-//                    initTables();
+                    initTables();
                     stepButton.setEnabled(true);
                     runButton.setEnabled(true);
                     synchronized (adaptor.operation) {
