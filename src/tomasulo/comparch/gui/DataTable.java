@@ -28,6 +28,7 @@ public class DataTable {
     public void add() {
         added = true;
     }
+
     public boolean isAdded() {
         return added;
     }
@@ -42,7 +43,7 @@ public class DataTable {
     }
 
     public void setListener(TableModelListener ml) {
-        if(this.listener == null) {
+        if (this.listener == null) {
             this.listener = ml;
             model.addTableModelListener(ml);
         }
@@ -82,14 +83,9 @@ public class DataTable {
         }
     }
 
-    public void setBounds(int x, int y, int width, int height) {
-        table.setBounds(x, y, width, height);
-    }
-
     public void addRow(String[] data) {
         model.addRow(data);
     }
-
 
     public void setText(String title) {
         label.setText(title);

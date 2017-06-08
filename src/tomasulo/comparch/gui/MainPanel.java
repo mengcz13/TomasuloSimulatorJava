@@ -239,8 +239,6 @@ public class MainPanel {
                 labels[i * 2 + j].setBounds(460 + j * 70, 400 + i * 80, 20, 20);
             }
         }
-        JLabel down = new JLabel("↓");
-
     }
 
     private ActionListener al = new ActionListener() {
