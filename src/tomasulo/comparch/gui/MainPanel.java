@@ -1,6 +1,5 @@
 package tomasulo.comparch.gui;
 
-
 import tomasulo.comparch.adaptor.Adaptor;
 import tomasulo.comparch.util.multithread.SharedField;
 
@@ -17,6 +16,36 @@ import java.util.Vector;
  * Created by THU73 on 17/5/30.
  */
 public class MainPanel {
+
+    private static String[][] defaultIns = {{"LD", "F6", "34", "R2"},
+            {"LD", "F2", "45", "R3"},
+            {"MULD", "F0", "F2", "F4"},
+            {"SUBD", "F8", "F6", "F2"},
+            {"DIVD", "F10", "F0", "F6"},
+            {"ADDD", "F6", "F8", "F2"}};
+    private static String[][] defaultState = {};
+    private static String[][] defaultLoad = {{"load0", "NO", "", ""},
+            {"load1", "NO", "", ""},
+            {"load2", "NO", "", ""}};
+    private static String[][] defaultStore = {{"store0", "NO", "", ""},
+            {"store1", "NO", "", ""},
+            {"store2", "NO", "", ""}};
+    private static String[][] defaultReserve = {{"", "Add0", "NO", "", ""},
+            {"", "Add1", "NO", "", ""},
+            {"", "Add2", "NO", "", ""},
+            {"", "Mul0", "NO", "", ""},
+            {"", "Mul1", "NO", "", ""}};
+    private static String[][] defaultMem = {};
+    private static String[][] defaultFu = {{"F0", "", ""}, {"F1", "", ""}, {"F2", "", ""}, {"F3", "", ""},
+            {"F4", "", ""}, {"F5", "", ""}, {"F6", "", ""}, {"F7", "", ""},
+            {"F8", "", ""}, {"F9", "", ""}, {"F10", "", ""}, {"F11", "", ""},
+            {"F12", "", ""}, {"F13", "", ""}, {"F14", "", ""}, {"F15", "", ""},
+            {"F16", "", ""}, {"F17", "", ""}, {"F18", "", ""}, {"F19", "", ""},};
+    private static String[][] defaultRu = {{"R0", ""}, {"R1", ""}, {"R2", ""}, {"R3", ""},
+            {"R4", ""}, {"R5", ""}, {"R6", ""}, {"R7", ""},
+            {"R8", ""}, {"R9", ""}, {"R10", ""}, {"R11", ""},
+            {"R12", ""}, {"R13", ""}, {"R14", ""}, {"R15", ""},
+            {"R16", ""}, {"R17", ""}, {"R18", ""}, {"R19", ""},};
 
     private JFrame frame;
 
@@ -38,10 +67,11 @@ public class MainPanel {
     private JButton loadFile;
     private JButton init;
 
+    private Clock clock;
     public Adaptor adaptor;
 
     public MainPanel() {
-        frame = new JFrame("tomasulo demo");
+        frame = new JFrame("Tomasulo Demo");
         frame.setLayout(null);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
@@ -55,6 +85,11 @@ public class MainPanel {
         ruTable = new DataTable();
         fuTable = new DataTable();
 
+        clock = new Clock();
+        frame.getContentPane().add(clock);
+        clock.show();
+        clock.setBounds(600, 450, 50, 50);
+
         initTables();
         initButtons();
 
@@ -66,64 +101,53 @@ public class MainPanel {
     }
 
     private void initTables() {
-        String[][] insData = {{"LD", "F6", "34", "R2"},
-                {"LD", "F2", "45", "R3"},
-                {"MULD", "F0", "F2", "F4"},
-                {"SUBD", "F8", "F6", "F2"},
-                {"DIVD", "F10", "F0", "F6"},
-                {"ADDD", "F6", "F8", "F2"}};
         String[] insColumn = {"ins", "Des", "Src_j", "Src_k"};
-        initTable(insTable, insColumn, insData, "指令序列", 25, 40, 200, 150);
+        initTable(insTable, insColumn, defaultIns, "指令序列",
+                25, 40, 200, 150);
         //set insTable
 
         String[] stateColumn = {"发射指令", "执行完毕", "写回结果"};
-        String[][] stateData = {};
-        initTable(stateTable, stateColumn, stateData, "运行状态", 300, 40, 200, 150);
+        initTable(stateTable, stateColumn, defaultState, "运行状态",
+                300, 40, 200, 150);
         //set stateTable
 
         String[] loadColumn = {"name", "busy", "address", "cache"};
-        String[][] loadData = {{"load0", "NO", "", ""},
-                {"load1", "NO", "", ""},
-                {"load2", "NO", "", ""}};
-        initTable(loadTable, loadColumn, loadData, "load队列", 550, 20, 200, 80);
+        initTable(loadTable, loadColumn, defaultLoad, "load队列",
+                550, 20, 200, 80);
         //set loadTable
 
         String[] storeColumn = {"name", "busy", "address", "cache"};
-        String[][] storeData = {{"store0", "NO", "", ""},
-                {"store1", "NO", "", ""},
-                {"store2", "NO", "", ""}};
-        initTable(storeTable, storeColumn, storeData, "store队列", 550, 120, 200, 80);
+        initTable(storeTable, storeColumn, defaultStore, "store队列",
+                550, 120, 200, 80);
         //set storeTable
 
         String[] reserveColumn = {"time", "name", "busy", "Operation", "Vi", "Vk", "Qi", "Qk"};
-        String[][] reserveData = {{"", "Add0", "NO", "", ""},
-                {"", "Add1", "NO", "", ""},
-                {"", "Add2", "NO", "", ""},
-                {"", "Mul0", "NO", "", ""},
-                {"", "Mul1", "NO", "", ""}};
-        initTable(reserveTable, reserveColumn, reserveData, "保留站", 250, 230, 500, 100);
+        initTable(reserveTable, reserveColumn, defaultReserve, "保留站",
+                250, 230, 500, 100);
         //set reserveTable
 
         String[] memColumn = {"Addr", "Data"};
-        String[][] memData = {};
-        initTable(memTable, memColumn, memData, "内存单元", 25, 230, 200, 100);
+        initTable(memTable, memColumn, defaultMem, "内存单元",
+                25, 230, 200, 100);
         memTable.setListener(ml);
         //set memTable
 
         String[] ruColumn = {"寄存器号", "数据"};
-        String[][] ruData = {{"R0", ""}, {"R1", ""}, {"R2", ""}, {"R3", ""},
-                {"R4", ""}, {"R5", ""}, {"R6", ""}, {"R7", ""},
-                {"R8", ""}, {"R9", ""}, {"R10", ""}};
-        initTable(ruTable, ruColumn, ruData, "整型寄存器", 25, 360, 150, 200);
+        initTable(ruTable, ruColumn, defaultRu, "整型寄存器",
+                25, 360, 150, 200);
         ruTable.setListener(ml);
         //set ruTable
 
         String[] fuColumn = {"寄存器号", "表达式", "数据"};
-        String[][] fuData = {{"F0", "", ""}, {"F1", "", ""}, {"F2", "", ""}, {"F3", "", ""},
-                {"F4", "", ""}, {"F5", "", ""}, {"F6", "", ""}, {"F7", "", ""},
-                {"F8", "", ""}, {"F9", "", ""}, {"F10", "", ""}};
-        initTable(fuTable, fuColumn, fuData, "浮点寄存器", 200, 360, 180, 200);
+        initTable(fuTable, fuColumn, defaultFu, "浮点寄存器",
+                200, 360, 180, 200);
         //set fuTable
+
+        fuTable.table().setEnabled(false);
+        reserveTable.table().setEnabled(false);
+        storeTable.table().setEnabled(false);
+        loadTable.table().setEnabled(false);
+        stateTable.table().setEnabled(false);
     }
 
     private void initTable(DataTable table, String[] column, String[][] data, String title,
@@ -144,14 +168,18 @@ public class MainPanel {
         @Override
         public void tableChanged(TableModelEvent e) {
             if (e.getSource() == memTable) {
-                synchronized (adaptor.operation) {
-                    adaptor.operation.set(SharedField.SET_MEM);
-                    adaptor.operation.notify();
+                if (checkMemLegality(e)) {
+                    synchronized (adaptor.operation) {
+                        adaptor.operation.set(SharedField.SET_MEM);
+                        adaptor.operation.notify();
+                    }
                 }
             } else if (e.getSource() == ruTable) {
-                synchronized (adaptor.operation) {
-                    adaptor.operation.set(SharedField.SET_REG);
-                    adaptor.operation.notify();
+                if (checkRegLegality(e)) {
+                    synchronized (adaptor.operation) {
+                        adaptor.operation.set(SharedField.SET_REG);
+                        adaptor.operation.notify();
+                    }
                 }
             }
         }
@@ -194,6 +222,9 @@ public class MainPanel {
         runButton.addActionListener(al);
         loadFile.addActionListener(al);
         init.addActionListener(al);
+
+        stepButton.setEnabled(false);
+        runButton.setEnabled(false);
     }
 
     public ActionListener al = new ActionListener() {
@@ -206,7 +237,7 @@ public class MainPanel {
             } else if (e.getSource() == delIns) {
                 String[][] vec = insTable.getData();
                 String[][] new_vec = new String[vec.length - 1][];
-                for(int i = 0; i < vec.length - 1; ++i) {
+                for (int i = 0; i < vec.length - 1; ++i) {
                     new_vec[i] = vec[i];
                 }
                 insTable.setData(new_vec);
@@ -218,13 +249,14 @@ public class MainPanel {
             } else if (e.getSource() == delMem) {
                 String[][] vec = memTable.getData();
                 String[][] new_vec = new String[vec.length - 1][];
-                for(int i = 0; i < vec.length - 1; ++i) {
+                for (int i = 0; i < vec.length - 1; ++i) {
                     new_vec[i] = vec[i];
                 }
                 memTable.setData(new_vec);
 
             } else if (e.getSource() == stepButton) {
                 synchronized (adaptor.operation) {
+                    clock.step();
                     adaptor.operation.set(SharedField.STEP);
                     adaptor.operation.notify();
                 }
@@ -265,16 +297,18 @@ public class MainPanel {
                                     "请选择正确的文件！",
                                     "文件错误",
                                     JOptionPane.ERROR_MESSAGE);
-
                             error.printStackTrace();
                         }
-
                     }
                 }
             } else if (e.getSource() == init) {
-                synchronized (adaptor.operation) {
-                    adaptor.operation.set(SharedField.INIT);
-                    adaptor.operation.notify();
+                if (checkLegality()) {
+                    stepButton.setEnabled(true);
+                    runButton.setEnabled(true);
+                    synchronized (adaptor.operation) {
+                        adaptor.operation.set(SharedField.INIT);
+                        adaptor.operation.notify();
+                    }
                 }
             }
         }
@@ -292,5 +326,17 @@ public class MainPanel {
             return true;
         }
         return false;
+    }
+
+    private boolean checkLegality() {
+        return true;
+    }
+
+    private boolean checkMemLegality(TableModelEvent e) {
+        return true;
+    }
+
+    private boolean checkRegLegality(TableModelEvent e) {
+        return true;
     }
 }
