@@ -11,15 +11,16 @@ public class Clock extends JLabel {
         super();
         count = 0;
     }
-    public void step() {
-        count++;
-        show();
+    public void setTime(int time) {
+        count = time;
+        update();
     }
+
     public void clear() {
         count = 0;
-        show();
+        update();
     }
-    public void show() {
+    public void update() {
         setText(Integer.toString(count));
     }
 }
