@@ -92,7 +92,7 @@ public class MainPanel {
         clock.update();
         clock.setBounds(600, 450, 50, 50);
 
-        initTables();
+        initTables(false);
         initButtons();
 
         frame.setVisible(true);
@@ -102,9 +102,10 @@ public class MainPanel {
         this.adaptor = adaptor;
     }
 
-    private void initTables() {
+    private void initTables(boolean isDefault) {
         String[] insColumn = {"ins", "Des", "Src_j", "Src_k"};
-        initTable(insTable, insColumn, defaultIns, "指令序列",
+        String[][] noDefault = {};
+        initTable(insTable, insColumn, isDefault ? defaultIns : noDefault, "指令序列",
                 25, 40, 200, 150);
         //set insTable
 
@@ -137,7 +138,6 @@ public class MainPanel {
         String[] ruColumn = {"寄存器号", "数据"};
         initTable(ruTable, ruColumn, defaultRu, "整型寄存器",
                 25, 360, 150, 200);
-        ruTable.setListener(ml);
         //set ruTable
 
         String[] fuColumn = {"寄存器号", "表达式", "数据"};
@@ -149,6 +149,8 @@ public class MainPanel {
         storeTable.getTable().setEnabled(false);
         loadTable.getTable().setEnabled(false);
         stateTable.getTable().setEnabled(false);
+        ruTable.getTable().setEnabled(false);
+        fuTable.getTable().setEnabled(false);
     }
 
     private void initTable(DataTable table, String[] column, String[][] data, String title,
@@ -274,8 +276,8 @@ public class MainPanel {
                         adaptor.operation.notify();
                     }
                 }
-            } else if(e.getSource() == setDefault) {
-                initTables();
+            } else if (e.getSource() == setDefault) {
+                initTables(true);
             }
         }
     };
@@ -283,22 +285,13 @@ public class MainPanel {
     public TableModelListener ml = new TableModelListener() {
         @Override
         public void tableChanged(TableModelEvent e) {
-            if (e.getSource() == memTable) {
-                if (checkMemLegality(e)) {
-                    synchronized (adaptor.operation) {
-                        adaptor.operation.set(SharedField.SET_MEM);
-                        adaptor.operation.notify();
-                    }
+            System.out.println("listen changed");
+            if (checkMemLegality(e)) {
+                synchronized (adaptor.operation) {
+                    System.out.println("set mem");
+                    adaptor.operation.set(SharedField.SET_MEM);
+                    adaptor.operation.notify();
                 }
-            } else if (e.getSource() == ruTable) {
-                if (checkRegLegality(e)) {
-                    synchronized (adaptor.operation) {
-                        adaptor.operation.set(SharedField.SET_REG);
-                        adaptor.operation.notify();
-                    }
-                }
-            } else if(e.getSource() == fuTable) {
-                
             }
         }
     };
@@ -330,7 +323,7 @@ public class MainPanel {
     }
 
     private boolean checkFuLegality(TableModelEvent e) {
-
+        return true;
     }
 
     private String[][] loadFileData() throws IOException {

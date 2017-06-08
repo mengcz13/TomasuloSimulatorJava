@@ -42,7 +42,10 @@ public class DataTable {
     }
 
     public void setListener(TableModelListener ml) {
-        this.listener = ml;
+        if(this.listener == null) {
+            this.listener = ml;
+            model.addTableModelListener(ml);
+        }
     }
 
     public void setData(String[][] data) {
