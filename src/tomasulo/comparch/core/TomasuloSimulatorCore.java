@@ -6,6 +6,7 @@ import tomasulo.comparch.util.name.RegisterName;
 import tomasulo.comparch.util.name.ReservationName;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by neozero on 17-5-31.
@@ -220,8 +221,9 @@ public class TomasuloSimulatorCore {
             } else {
                 addr = Integer.parseInt(aMemTable[0], 16);
             }
-            int newvalue = Integer.parseInt(aMemTable[1]);
+            double newvalue = Double.parseDouble(aMemTable[1]);
             this.setMem(addr, newvalue);
+            System.out.println(newvalue);
         }
     }
 
@@ -257,7 +259,7 @@ public class TomasuloSimulatorCore {
         for (String[] anRuTable : ruTable) {
             assert anRuTable[0].charAt(0) == 'R';
             int rank = Integer.parseInt(anRuTable[0].substring(1));
-            int newvalue = Integer.parseInt(anRuTable[1]);
+            int newvalue = Integer.parseInt(anRuTable[1], 16);
             this.registers.get(RegisterName.INT).get(rank).intValue = newvalue;
         }
     }

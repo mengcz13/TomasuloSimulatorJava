@@ -101,7 +101,7 @@ public class ReservationStation {
         text[0] = ReservationName.reservationNameMap.get(reservationName) + Integer.toString(rank);
         if (busy) {
             text[1] = "YES";
-            text[2] = Integer.toString(addr);
+            text[2] = Integer.toHexString(addr);
             text[3] = "";
         } else {
             text[1] = "NO";
@@ -115,7 +115,7 @@ public class ReservationStation {
         text[0] = ReservationName.reservationNameMap.get(reservationName) + Integer.toString(rank);
         if (busy) {
             text[1] = "YES";
-            text[2] = Integer.toString(addr);
+            text[2] = Integer.toHexString(addr);
             text[3] = (qStore.busy) ? ReservationName.reservationNameMap.get(qStore.reservationName) + Integer.toString(qStore.rank) : Double.toString(qStore.floatResult);
         } else {
             text[1] = "NO";

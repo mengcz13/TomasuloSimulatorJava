@@ -70,7 +70,7 @@ public class Instruction {
                 assert inst[1].charAt(0) == 'F';
                 assert inst[3].charAt(0) == 'R';
                 reg0 = new RegisterPair(RegisterName.FLOAT, Integer.parseInt(inst[1].substring(1)));
-                regJ = new RegisterPair(RegisterName.INSTVALUE, Integer.parseInt(inst[2]));
+                regJ = new RegisterPair(RegisterName.INSTVALUE, Integer.parseInt(inst[2], 16));
                 regK = new RegisterPair(RegisterName.INT, Integer.parseInt(inst[3].substring(1)));
                 break;
         }
