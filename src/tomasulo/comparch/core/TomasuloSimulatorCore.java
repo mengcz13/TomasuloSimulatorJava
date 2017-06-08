@@ -217,8 +217,12 @@ public class TomasuloSimulatorCore {
 
     public void setMemTable(String[][] memTable) {
         for (String[] aMemTable : memTable) {
-            assert aMemTable[0].substring(0, 2).equals("0x");
-            int addr = Integer.parseInt(aMemTable[0].substring(2), 16);
+            int addr = -1;
+            if (aMemTable[0].startsWith("0x")) {
+                addr = Integer.parseInt(aMemTable[0].substring(2), 16);
+            } else {
+                addr = Integer.parseInt(aMemTable[0], 16);
+            }
             int newvalue = Integer.parseInt(aMemTable[1]);
             this.setMem(addr, newvalue);
         }
