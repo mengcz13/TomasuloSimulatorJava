@@ -60,6 +60,7 @@ public class Adaptor implements Runnable {
                 switch (code) {
                     case SharedField.INIT:
                         engine.setInsTable(panelHandle.insTable.getData());
+                        engine.setMemTable(panelHandle.memTable.getData());
                         break;
                     case SharedField.RUN:
                         if (!engine.runnable) {
