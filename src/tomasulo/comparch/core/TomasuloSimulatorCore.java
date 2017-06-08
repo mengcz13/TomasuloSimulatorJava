@@ -6,6 +6,7 @@ import tomasulo.comparch.util.name.RegisterName;
 import tomasulo.comparch.util.name.ReservationName;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by neozero on 17-5-31.
@@ -42,9 +43,6 @@ public class TomasuloSimulatorCore {
 
     // 当前周期中已经执行过操作的指令, 模拟过程中用于保证一条指令在一个周期中仅会执行Issue/Exec/Writeback中的一个
     private Set<Integer> pcsInCurrentClock;
-
-    // 当前周期中浮点运算器流水线中的指令数量
-    // private Map<Integer, Integer> arithInCurrentClock;
 
     // 等待进入流水线的队列, FIFO
     private Map<Integer, LinkedList<ReservationStation>> waitingList;
@@ -217,10 +215,15 @@ public class TomasuloSimulatorCore {
 
     public void setMemTable(String[][] memTable) {
         for (String[] aMemTable : memTable) {
-            assert aMemTable[0].substring(0, 2).equals("0x");
-            int addr = Integer.parseInt(aMemTable[0].substring(2), 16);
-            int newvalue = Integer.parseInt(aMemTable[1]);
+            int addr = -1;
+            if (aMemTable[0].startsWith("0x")) {
+                addr = Integer.parseInt(aMemTable[0].substring(2), 16);
+            } else {
+                addr = Integer.parseInt(aMemTable[0], 16);
+            }
+            double newvalue = Double.parseDouble(aMemTable[1]);
             this.setMem(addr, newvalue);
+            System.out.println(newvalue);
         }
     }
 
@@ -256,7 +259,7 @@ public class TomasuloSimulatorCore {
         for (String[] anRuTable : ruTable) {
             assert anRuTable[0].charAt(0) == 'R';
             int rank = Integer.parseInt(anRuTable[0].substring(1));
-            int newvalue = Integer.parseInt(anRuTable[1]);
+            int newvalue = Integer.parseInt(anRuTable[1], 16);
             this.registers.get(RegisterName.INT).get(rank).intValue = newvalue;
         }
     }
@@ -393,78 +396,6 @@ public class TomasuloSimulatorCore {
             this.pcsInCurrentClock.add(res.pc);
             this.instList.get(res.pc).record.put(InstStateName.EXECCOMP, clock);
         }
-        /*
-        for (Map.Entry<Integer, List<ReservationStation>> entry : this.reservationStations.entrySet()) {
-            int resname = entry.getKey();
-            List<ReservationStation> list = entry.getValue();
-            for (ReservationStation res : list) {
-                if (!pcsInCurrentClock.contains(res.pc) && res.busy) {  // 这里跳过了本周期中刚刚issue的指令占用的单元和非busy(实际上为计算完毕的常数)的单元
-                    // boolean justIssued = (res.busyCountDown == OperatorName.busyCountDownMap.get(res.operatorName));    // 表示是否为上一个周期刚刚issue的指令
-                    // boolean arithReady = this.arithInCurrentClock.get(resname) < ReservationName.maxArithmicItem.get(resname);  // 需要的运算器是否可以继续接收指令(由于流水线级数有限)
-                    boolean ready = false;
-                    switch (OperatorName.operatorReservationMap.get(res.operatorName)) {    // 判断源操作数是否都已经计算完成
-                        case ReservationName.ADD:
-                        case ReservationName.MULT:
-                            ready = !(res.qJ.busy || res.qK.busy);
-                            break;
-                        case ReservationName.LOAD:
-                            ready = true;
-                            break;
-                        case ReservationName.STORE:
-                            ready = !(res.qStore.busy);
-                            break;
-                        default:
-                            break;
-                    }
-                    if (ready) {
-                        if (justIssued) {   // 对于上个clock刚刚issue的指令, 这里要判断本周期内是否被送入了运算器
-                            if (arithReady) {
-                                res.inArithm = true;
-                                this.arithInCurrentClock.put(resname, this.arithInCurrentClock.get(resname) + 1);
-                            }
-                            else {
-                                continue;
-                            }
-                        }
-                        if (res.busyCountDown > 0) {    // 对于所有运算器内的指令, 执行运算
-                            --res.busyCountDown;
-                            this.pcsInCurrentClock.add(res.pc);
-                            if (res.busyCountDown == 0) {   // 设定最后一个周期给出结果
-                                switch (res.operatorName) {
-                                    case OperatorName.ADDD:
-                                        res.floatResult = res.qJ.floatResult + res.qK.floatResult;
-                                        break;
-                                    case OperatorName.SUBD:
-                                        res.floatResult = res.qJ.floatResult - res.qK.floatResult;
-                                        break;
-                                    case OperatorName.MULTD:
-                                        res.floatResult = res.qJ.floatResult * res.qK.floatResult;
-                                        break;
-                                    case OperatorName.DIVD:
-                                        if (res.qK.floatResult == 0.0) {
-                                            res.floatResult = 0.0;
-                                        } else {
-                                            res.floatResult = res.qJ.floatResult / res.qK.floatResult;
-                                        }
-                                        break;
-                                    case OperatorName.LD:
-                                        res.floatResult = this.mem.get(res.addr);
-                                        break;
-                                    case OperatorName.ST:
-                                        this.mem.set(res.addr, res.qStore.floatResult);
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                Instruction inst = this.instList.get(res.pc);
-                                inst.record.put(InstStateName.EXECCOMP, clock);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        */
     }
 
     private void writeBack() {  // 写回操作只需要修改Reservation Station的状态即可, 由于Java传递引用的特性, 对应位置的值会自动变化
