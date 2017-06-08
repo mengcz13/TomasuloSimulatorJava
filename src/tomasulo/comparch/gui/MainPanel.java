@@ -17,6 +17,11 @@ import java.util.Vector;
  */
 public class MainPanel {
 
+    private int proState;
+    public static final int SETTING = 0;
+    public static final int INITTED = 1;
+    public static final int RUNNING = 2;
+
     private static final String[][] defaultIns = {{"LD", "F6", "34", "R2"},
             {"LD", "F2", "45", "R3"},
             {"MULD", "F0", "F2", "F4"},
@@ -78,6 +83,8 @@ public class MainPanel {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
 
+        proState = SETTING;
+
         insTable = new DataTable();
         stateTable = new DataTable();
         reserveTable = new DataTable();
@@ -90,16 +97,24 @@ public class MainPanel {
         clock = new Clock();
         frame.getContentPane().add(clock);
         clock.update();
-        clock.setBounds(600, 450, 50, 50);
+        clock.setBounds(650, 400, 100, 50);
 
         initTables(false);
         initButtons();
+        initLabels();
+
+        updateState();
 
         frame.setVisible(true);
     }
 
     public void setAdaptor(Adaptor adaptor) {
         this.adaptor = adaptor;
+    }
+
+    public void terminate() {
+        proState = SETTING;
+        updateState();
     }
 
     private void initTables(boolean isDefault) {
@@ -151,6 +166,8 @@ public class MainPanel {
         stateTable.getTable().setEnabled(false);
         ruTable.getTable().setEnabled(false);
         fuTable.getTable().setEnabled(false);
+        memTable.getTable().setEnabled(false);
+        insTable.getTable().setEnabled(false);
     }
 
     private void initTable(DataTable table, String[] column, String[][] data, String title,
@@ -176,10 +193,10 @@ public class MainPanel {
         addMem = new JButton("+");
         delMem = new JButton("-");
         stepButton = new JButton("单步执行");
-        runButton = new JButton("连续执行");
+        runButton = new JButton("执行到底");
         loadFile = new JButton("读取指令文本");
         init = new JButton("初始化数据");
-        setDefault = new JButton("恢复默认参数");
+        setDefault = new JButton("使用默认数据");
 
 
         frame.getContentPane().add(addIns);
@@ -196,11 +213,11 @@ public class MainPanel {
         delIns.setBounds(180, 15, 18, 18);
         addMem.setBounds(160, 210, 18, 18);
         delMem.setBounds(180, 210, 18, 18);
-        setDefault.setBounds(500, 400, 100, 40);
-        stepButton.setBounds(500, 450, 100, 40);
-        runButton.setBounds(500, 500, 100, 40);
-        loadFile.setBounds(650, 400, 100, 40);
-        init.setBounds(650, 450, 100, 40);
+        setDefault.setBounds(400, 350, 100, 40);
+        stepButton.setBounds(400, 510, 100, 40);
+        runButton.setBounds(510, 510, 100, 40);
+        loadFile.setBounds(510, 350, 100, 40);
+        init.setBounds(450, 430, 100, 40);
 
         addIns.addActionListener(al);
         delIns.addActionListener(al);
@@ -211,17 +228,34 @@ public class MainPanel {
         loadFile.addActionListener(al);
         init.addActionListener(al);
         setDefault.addActionListener(al);
-
-        stepButton.setEnabled(false);
-        runButton.setEnabled(false);
     }
 
-    public ActionListener al = new ActionListener() {
+    private void initLabels() {
+        JLabel[] labels = new JLabel[4];
+        for (int i = 0; i < 2; ++i) {
+            for (int j = 0; j < 2; ++j) {
+                labels[i * 2 + j] = new JLabel("↓");
+                frame.getContentPane().add(labels[i * 2 + j]);
+                labels[i * 2 + j].setBounds(460 + j * 70, 400 + i * 80, 20, 20);
+            }
+        }
+    }
+
+    private ActionListener al = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == addIns) {
-                String[] new_data = {"???", "???", "???", "???"};
-                insTable.addRow(new_data);
+                String str = JOptionPane.showInputDialog("输入内存地址和对应的值，中间用空格分开。\n" +
+                        "如： MULD F1 F2 R2");
+                String[] new_data = str.split(" ");
+                if (isGoodInstruction(new_data)) {
+                    insTable.addRow(new_data);
+                } else {
+                    JOptionPane.showMessageDialog(null,
+                            "请输入正确的指令！",
+                            "指令错误",
+                            JOptionPane.ERROR_MESSAGE);
+                }
 
             } else if (e.getSource() == delIns) {
                 String[][] vec = insTable.getData();
@@ -232,9 +266,17 @@ public class MainPanel {
                 insTable.setData(new_vec);
 
             } else if (e.getSource() == addMem) {
-                String[] new_data = {"???", "???"};
-                memTable.addRow(new_data);
-
+                String str = JOptionPane.showInputDialog("输入内存地址和对应的值，中间用空格分开。\n" +
+                        "如： 0xfff(3位16进制地址) 1.22(任意数字)");
+                String[] new_data = str.split(" ");
+                if (isGoodMemory(new_data)) {
+                    memTable.addRow(new_data);
+                } else {
+                    JOptionPane.showMessageDialog(null,
+                            "请输入正确的内存数据！",
+                            "数据错误",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             } else if (e.getSource() == delMem) {
                 String[][] vec = memTable.getData();
                 String[][] new_vec = new String[vec.length - 1][];
@@ -249,6 +291,8 @@ public class MainPanel {
                     adaptor.operation.notify();
                 }
             } else if (e.getSource() == runButton) {
+                proState = RUNNING;
+                updateState();
                 synchronized (adaptor.operation) {
                     adaptor.operation.set(SharedField.RUN);
                     adaptor.operation.notify();
@@ -267,26 +311,25 @@ public class MainPanel {
                     error.printStackTrace();
                 }
             } else if (e.getSource() == init) {
-                if (checkLegality()) {
-                    clock.clear();
-                    stepButton.setEnabled(true);
-                    runButton.setEnabled(true);
-                    synchronized (adaptor.operation) {
-                        adaptor.operation.set(SharedField.INIT);
-                        adaptor.operation.notify();
-                    }
+                clock.clear();
+                proState = INITTED;
+                updateState();
+                synchronized (adaptor.operation) {
+                    adaptor.operation.set(SharedField.INIT);
+                    adaptor.operation.notify();
                 }
+
             } else if (e.getSource() == setDefault) {
                 initTables(true);
             }
         }
     };
 
-    public TableModelListener ml = new TableModelListener() {
+    private TableModelListener ml = new TableModelListener() {
         @Override
         public void tableChanged(TableModelEvent e) {
             System.out.println("listen changed");
-            if (checkMemLegality(e)) {
+            if (proState == INITTED) {
                 synchronized (adaptor.operation) {
                     System.out.println("set mem");
                     adaptor.operation.set(SharedField.SET_MEM);
@@ -309,20 +352,19 @@ public class MainPanel {
         return false;
     }
 
-    private boolean checkLegality() {
-        return true;
-    }
-
-    private boolean checkMemLegality(TableModelEvent e) {
-
-        return true;
-    }
-
-    private boolean checkRegLegality(TableModelEvent e) {
-        return true;
-    }
-
-    private boolean checkFuLegality(TableModelEvent e) {
+    private boolean isGoodMemory(String[] data) {
+        if (data.length != 2) return false;
+        if (data[0].length() > 3) return false;
+        for (int i = 0; i < data[0].length(); ++i) {
+            if (data[0].charAt(i) != 'x' && (data[0].charAt(i) - '0' < 0 || data[0].charAt(i) - '9' > 0)) {
+                return false;
+            }
+        }
+        try {
+            float res = Float.parseFloat(data[1]);
+        } catch (Exception e) {
+            return false;
+        }
         return true;
     }
 
@@ -357,4 +399,27 @@ public class MainPanel {
         }
         return null;
     }
+
+    private void updateState() {
+        if (proState == SETTING) {
+            stepButton.setEnabled(false);
+            runButton.setEnabled(false);
+            setDefault.setEnabled(true);
+            loadFile.setEnabled(true);
+            init.setEnabled(true);
+        } else if (proState == INITTED) {
+            stepButton.setEnabled(true);
+            runButton.setEnabled(true);
+            setDefault.setEnabled(false);
+            loadFile.setEnabled(false);
+            init.setEnabled(false);
+        } else if (proState == RUNNING) {
+            stepButton.setEnabled(false);
+            runButton.setEnabled(false);
+            setDefault.setEnabled(false);
+            loadFile.setEnabled(false);
+            init.setEnabled(false);
+        }
+    }
+
 }

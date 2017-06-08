@@ -75,6 +75,7 @@ public class Adaptor implements Runnable {
 
                             }
                         }
+                        panelHandle.terminate();
                         break;
                     case SharedField.STEP:
                         if (!engine.runnable) {
@@ -82,6 +83,9 @@ public class Adaptor implements Runnable {
                         }
                         engine.step();
                         collectResult(engine, panelHandle);
+                        if(!engine.checkFinish()) {
+                            panelHandle.terminate();
+                        }
                         break;
                     case SharedField.SET_MEM:
                         if (!engine.runnable) {

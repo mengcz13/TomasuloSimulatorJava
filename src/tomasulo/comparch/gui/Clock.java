@@ -21,6 +21,6 @@ public class Clock extends JLabel {
         update();
     }
     public void update() {
-        setText(Integer.toString(count));
+        setText("周期计数：" + Integer.toString(count));
     }
 }
