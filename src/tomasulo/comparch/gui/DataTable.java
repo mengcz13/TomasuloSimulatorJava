@@ -13,21 +13,27 @@ public class DataTable {
     private JTable table;
     private DefaultTableModel model;
     private String[] header;
-    private TableModelListener listener = null;
+    private TableModelListener listener;
+    private JLabel label;
 
     public DataTable() {
         table = new JTable();
+        label = new JLabel();
         model = new DefaultTableModel();
         table.setModel(model);
     }
 
     public void setHeader(String[] header) {
-        this.header = header;
-        if (header != null) {
+        if (this.header == null && header != null) {
+            this.header = header;
             for (int i = 0; i < header.length; ++i) {
                 model.addColumn(header[i]);
             }
         }
+    }
+
+    public void setListener(TableModelListener ml) {
+        this.listener = ml;
     }
 
     public void setData(String[][] data) {
@@ -37,19 +43,12 @@ public class DataTable {
         }
     }
 
-    public void setData(Vector<Vector<String>> vec) {
-        clear();
-        for(int i = 0; i <vec.size(); ++i) {
-            model.addRow(vec.elementAt(i));
-        }
-    }
-
     public String[][] getData() {
         Vector<Vector<String>> vec = model.getDataVector();
         String[][] data = new String[vec.size()][];
-        for(int i = 0; i < vec.size(); ++i) {
+        for (int i = 0; i < vec.size(); ++i) {
             String[] sec_data = new String[vec.elementAt(i).size()];
-            for(int j = 0; j < vec.elementAt(i).size(); ++j) {
+            for (int j = 0; j < vec.elementAt(i).size(); ++j) {
                 sec_data[j] = vec.elementAt(i).elementAt(j);
             }
             data[i] = sec_data;
@@ -59,16 +58,13 @@ public class DataTable {
     }
 
     public void clear() {
-        table.removeAll();
-        model = new DefaultTableModel();
-        table.setModel(model);
-        if(listener != null) {
-            model.addTableModelListener(listener);
+        while (model.getRowCount() > 0) {
+            model.removeRow(0);
         }
-        setHeader(header);
     }
 
     public JTable table() {
+
         return this.table;
     }
 
@@ -79,7 +75,9 @@ public class DataTable {
     public void addRow(String[] data) {
         model.addRow(data);
     }
-    public void setListener(TableModelListener ml) {
-        this.listener = ml;
+
+
+    public void setText(String title) {
+        label.setText(title);
     }
 }

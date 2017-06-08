@@ -17,31 +17,31 @@ import java.util.Vector;
  */
 public class MainPanel {
 
-    private static String[][] defaultIns = {{"LD", "F6", "34", "R2"},
+    private static final String[][] defaultIns = {{"LD", "F6", "34", "R2"},
             {"LD", "F2", "45", "R3"},
             {"MULD", "F0", "F2", "F4"},
             {"SUBD", "F8", "F6", "F2"},
             {"DIVD", "F10", "F0", "F6"},
             {"ADDD", "F6", "F8", "F2"}};
-    private static String[][] defaultState = {};
-    private static String[][] defaultLoad = {{"load0", "NO", "", ""},
+    private static final String[][] defaultState = {};
+    private static final String[][] defaultLoad = {{"load0", "NO", "", ""},
             {"load1", "NO", "", ""},
             {"load2", "NO", "", ""}};
-    private static String[][] defaultStore = {{"store0", "NO", "", ""},
+    private static final String[][] defaultStore = {{"store0", "NO", "", ""},
             {"store1", "NO", "", ""},
             {"store2", "NO", "", ""}};
-    private static String[][] defaultReserve = {{"", "Add0", "NO", "", ""},
+    private static final String[][] defaultReserve = {{"", "Add0", "NO", "", ""},
             {"", "Add1", "NO", "", ""},
             {"", "Add2", "NO", "", ""},
             {"", "Mul0", "NO", "", ""},
             {"", "Mul1", "NO", "", ""}};
-    private static String[][] defaultMem = {};
-    private static String[][] defaultFu = {{"F0", "", ""}, {"F1", "", ""}, {"F2", "", ""}, {"F3", "", ""},
+    private static final String[][] defaultMem = {};
+    private static final String[][] defaultFu = {{"F0", "", ""}, {"F1", "", ""}, {"F2", "", ""}, {"F3", "", ""},
             {"F4", "", ""}, {"F5", "", ""}, {"F6", "", ""}, {"F7", "", ""},
             {"F8", "", ""}, {"F9", "", ""}, {"F10", "", ""}, {"F11", "", ""},
             {"F12", "", ""}, {"F13", "", ""}, {"F14", "", ""}, {"F15", "", ""},
             {"F16", "", ""}, {"F17", "", ""}, {"F18", "", ""}, {"F19", "", ""},};
-    private static String[][] defaultRu = {{"R0", ""}, {"R1", ""}, {"R2", ""}, {"R3", ""},
+    private static final String[][] defaultRu = {{"R0", ""}, {"R1", ""}, {"R2", ""}, {"R3", ""},
             {"R4", ""}, {"R5", ""}, {"R6", ""}, {"R7", ""},
             {"R8", ""}, {"R9", ""}, {"R10", ""}, {"R11", ""},
             {"R12", ""}, {"R13", ""}, {"R14", ""}, {"R15", ""},
@@ -57,6 +57,7 @@ public class MainPanel {
     public DataTable storeTable;
     public DataTable ruTable;
     public DataTable fuTable;
+    public Clock clock;
 
     private JButton addIns;
     private JButton delIns;
@@ -67,7 +68,7 @@ public class MainPanel {
     private JButton loadFile;
     private JButton init;
 
-    private Clock clock;
+
     public Adaptor adaptor;
 
     public MainPanel() {
@@ -256,7 +257,6 @@ public class MainPanel {
 
             } else if (e.getSource() == stepButton) {
                 synchronized (adaptor.operation) {
-                    clock.step();
                     adaptor.operation.set(SharedField.STEP);
                     adaptor.operation.notify();
                 }
@@ -266,43 +266,21 @@ public class MainPanel {
                     adaptor.operation.notify();
                 }
             } else if (e.getSource() == loadFile) {
-                JFileChooser fc = new JFileChooser();
-                fc.setDialogTitle("请选择指令文件");
-                fc.setFileFilter(new FileNameExtensionFilter("文本文件(\".txt\")", "txt"));
-                int retVal = fc.showOpenDialog(frame);
-                if (retVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    if (file.isFile() && file.exists()) {
-                        try {
-                            InputStreamReader read = new InputStreamReader(
-                                    new FileInputStream(file));
-                            BufferedReader bufferedReader = new BufferedReader(read);
-                            String lineTxt;
-                            Vector<String[]> vec = new Vector<>();
-                            while ((lineTxt = bufferedReader.readLine()) != null) {
-                                String[] data = lineTxt.split(" ");
-                                if (!isGoodInstruction(data)) {
-                                    throw new IOException();
-                                }
-                                vec.add(data);
-                            }
-                            String[][] data = new String[vec.size()][];
-                            for (int i = 0; i < vec.size(); ++i) {
-                                data[i] = vec.elementAt(i);
-                            }
-                            insTable.setData(data);
-                            read.close();
-                        } catch (IOException error) {
-                            JOptionPane.showMessageDialog(null,
-                                    "请选择正确的文件！",
-                                    "文件错误",
-                                    JOptionPane.ERROR_MESSAGE);
-                            error.printStackTrace();
-                        }
+                try {
+                    String[][] data = loadFileData();
+                    if (data != null) {
+                        insTable.setData(data);
                     }
+                } catch (IOException error) {
+                    JOptionPane.showMessageDialog(null,
+                            "请选择正确的文件！",
+                            "文件错误",
+                            JOptionPane.ERROR_MESSAGE);
+                    error.printStackTrace();
                 }
             } else if (e.getSource() == init) {
                 if (checkLegality()) {
+//                    initTables();
                     stepButton.setEnabled(true);
                     runButton.setEnabled(true);
                     synchronized (adaptor.operation) {
@@ -329,14 +307,48 @@ public class MainPanel {
     }
 
     private boolean checkLegality() {
+
         return true;
     }
 
     private boolean checkMemLegality(TableModelEvent e) {
+
         return true;
     }
 
     private boolean checkRegLegality(TableModelEvent e) {
         return true;
+    }
+
+    private String[][] loadFileData() throws IOException {
+        JFileChooser fc = new JFileChooser();
+        fc.setDialogTitle("请选择指令文件");
+        fc.setFileFilter(new FileNameExtensionFilter("文本文件(\".txt\")", "txt"));
+        int retVal = fc.showOpenDialog(frame);
+
+        if (retVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            if (file.isFile() && file.exists()) {
+                InputStreamReader read = new InputStreamReader(
+                        new FileInputStream(file));
+                BufferedReader bufferedReader = new BufferedReader(read);
+                String lineTxt;
+                Vector<String[]> vec = new Vector<>();
+                while ((lineTxt = bufferedReader.readLine()) != null) {
+                    String[] data = lineTxt.split(" ");
+                    if (!isGoodInstruction(data)) {
+                        throw new IOException();
+                    }
+                    vec.add(data);
+                }
+                String[][] data = new String[vec.size()][];
+                for (int i = 0; i < vec.size(); ++i) {
+                    data[i] = vec.elementAt(i);
+                }
+                read.close();
+                return data;
+            }
+        }
+        return null;
     }
 }
