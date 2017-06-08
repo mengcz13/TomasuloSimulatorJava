@@ -8,25 +8,32 @@ import tomasulo.comparch.util.name.InstStateName;
 import java.util.*;
 
 /**
- * Created by neozero on 17-5-31.
- *
- * Define the structure of a single instruction.
+ * 定义指令, 用于记录指令执行的历史记录和Issue阶段确定寄存器.
  */
 public class Instruction {
 
-    // 指令的运算种类
+    /**
+     * 指令的运算种类.
+     */
     public int op;
 
-    // 寄存器种类+序号
+    /**
+     * 寄存器种类+序号.
+     */
     public RegisterPair reg0;
 
     public RegisterPair regJ;
 
     public RegisterPair regK;
 
+    /**
+     * 指令原始文本.
+     */
     public String[] ins = new String[4];
 
-    // 记录各阶段操作发生时的周期数
+    /**
+     * 记录各阶段操作发生时的周期数.
+     */
     public Map<Integer, Integer> record = new HashMap<Integer, Integer>();
 
     public Instruction() {
@@ -41,7 +48,10 @@ public class Instruction {
         parseInstStrArray(inst);
     }
 
-    // 解析指令字符串
+    /**
+     * 解析指令字符串为字符串数组.
+     * @param inst 指令字符串, 用空格分隔不同部分, 格式为"OP F1 F2 F3".
+     */
     public void parseInst(String inst) {
         String[] inss = inst.split(" ");
         String[] ns = inss[1].split(",");
@@ -53,6 +63,10 @@ public class Instruction {
         this.parseInstStrArray(temp);
     }
 
+    /**
+     * 解析指令字符串数组, 得到需要操作的寄存器.
+     * @param inst 指令字符串数组.
+     */
     public void parseInstStrArray(String[] inst) {
         op = OperatorName.nameOperatorMap.get(inst[0]);
         switch (op) {
@@ -78,17 +92,27 @@ public class Instruction {
         reset();
     }
 
-    // 重置指令, 这里指令内容不变, 仅清空历史记录
+    /**
+     * 重置指令, 这里指令内容不变, 仅清空历史记录
+     */
     public void reset() {
         for (Integer state : InstStateName.instStateNameMap.values()) {
             record.put(state, 0);
         }
     }
 
+    /**
+     * 返回指令文本.
+     * @return 指令的原始文本.
+     */
     public String[] getText() {
         return ins;
     }
 
+    /**
+     * 返回指令执行记录.
+     * @return 指令执行历史记录的二维字符串数组. 格式为{{"ISSUE", "EXEC", "WRITEBACK"}}.
+     */
     public String[] getState() {
         String[] stateTable = new String[3];
         stateTable[0] = record.get(InstStateName.ISSUE).toString();
