@@ -4,59 +4,96 @@ import tomasulo.comparch.util.name.OperatorName;
 import tomasulo.comparch.util.name.ReservationName;
 
 /**
- * Created by neozero on 17-5-31.
+ * Reservation Station定义. 具体实现中该类同时承担了保留站/寄存器的任务.
  */
 public class ReservationStation {
 
-    // 在RS队列中的rank
+    /**
+     * 在RS队列中的rank.
+     */
     public int rank;
 
-    // 装入指令的pc
+    /**
+     * 装入指令的pc.
+     */
     public int pc;
 
-    // 运算种类
+    /**
+     * 运算种类.
+     */
     public int operatorName;
 
-    // 进入的运算器/读写器的种类
+    /**
+     * 进入的运算器/读写器的种类.
+     */
     public int reservationName;
 
-    // 是否繁忙, busy==false表明当前Station中为具体的浮点数(来源为初始化或已经完成的运算)
+    /**
+     * 是否繁忙, busy==false表明当前Station中为具体的浮点数(来源为初始化或已经完成的运算).
+     */
     public boolean busy = false;
 
-    // 当前操作完成还剩余的周期数
+    /**
+     * 当前操作完成还剩余的周期数.
+     */
     public int busyCountDown;
 
-    // 当前操作在ALU中的stage
+    /**
+     * 当前操作在ALU流水线中的stage.
+     */
     public int stage;
 
-    // 浮点运算结果or LOAD结果
+    /**
+     * 浮点运算结果or LOAD结果.
+     */
     public double floatResult;
 
-    // 源操作数(的引用), 是否执行完成要根据对应的busy判断
+    /**
+     * 源操作数(的引用), 是否执行完成要根据对应的busy判断.
+     */
     public ReservationStation qJ;
 
+    /**
+     * 源操作数(的引用), 是否执行完成要根据对应的busy判断.
+     */
     public ReservationStation qK;
 
-    // 是否已进入运算器执行
+    /**
+     * 是否已进入运算器执行.
+     */
     public boolean inArithm;
 
     // For load and store only
 
-    // STORE指令的源寄存器
+    /**
+     * STORE指令的源寄存器.
+     */
     public ReservationStation qStore;
 
-    // 地址, 装入时可以确定(因不涉及对整数寄存器的修改)
+    /**
+     * 地址, 装入时可以确定(因不涉及对整数寄存器的修改).
+     */
     public int addr;
 
-    // 作为整数寄存器使用时用于存储值
+    /**
+     * 作为整数寄存器使用时用于存储值.
+     */
     public int intValue;
 
+    /**
+     * 构造函数.
+     * @param reservationName 保留站对应的名称.
+     * @param rank 保留站的序号.
+     */
     public ReservationStation(int reservationName, int rank) {
         reset();
         this.rank = rank;
         this.reservationName = reservationName;
     }
 
+    /**
+     * 重置保留站.
+     */
     public void reset() {
         pc = -1;
         busy = false;
@@ -72,6 +109,10 @@ public class ReservationStation {
         intValue = 0;
     }
 
+    /**
+     * 返回Add和Mul操作的Reservation Station.
+     * @return Reservation Station的二维字符串数组. 格式为{{"time", "name", "busy", "operation", "Vi", "Vj", "Qi", "Qj"}}.
+     */
     public String[] getNormalRSText() {
         String[] text = new String[8];
         if (busy) {
@@ -96,6 +137,10 @@ public class ReservationStation {
         return text;
     }
 
+    /**
+     * 返回Load操作的Reservation Station.
+     * @return Reservation Station的二维字符串数组. 格式为{{"name", "busy", "address", "cache"}}.
+     */
     public String[] getLoadText() {
         String[] text = new String[4];
         text[0] = ReservationName.reservationNameMap.get(reservationName) + Integer.toString(rank);
@@ -110,6 +155,10 @@ public class ReservationStation {
         return text;
     }
 
+    /**
+     * 返回Store操作的Reservation Station.
+     * @return Reservation Station的二维字符串数组. 格式为{{"name", "busy", "address", "cache"}}.
+     */
     public String[] getStoreText() {
         String[] text = new String[4];
         text[0] = ReservationName.reservationNameMap.get(reservationName) + Integer.toString(rank);
