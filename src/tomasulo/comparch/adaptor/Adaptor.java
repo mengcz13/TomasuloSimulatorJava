@@ -75,6 +75,7 @@ public class Adaptor implements Runnable {
 
                             }
                         }
+                        panelHandle.terminate();
                         break;
                     case SharedField.STEP:
                         if (!engine.runnable) {

@@ -97,10 +97,11 @@ public class MainPanel {
         clock = new Clock();
         frame.getContentPane().add(clock);
         clock.update();
-        clock.setBounds(600, 450, 50, 50);
+        clock.setBounds(650, 400, 100, 50);
 
         initTables(false);
         initButtons();
+        initLabels();
 
         updateState();
 
@@ -165,6 +166,8 @@ public class MainPanel {
         stateTable.getTable().setEnabled(false);
         ruTable.getTable().setEnabled(false);
         fuTable.getTable().setEnabled(false);
+        memTable.getTable().setEnabled(false);
+        insTable.getTable().setEnabled(false);
     }
 
     private void initTable(DataTable table, String[] column, String[][] data, String title,
@@ -193,7 +196,7 @@ public class MainPanel {
         runButton = new JButton("执行到底");
         loadFile = new JButton("读取指令文本");
         init = new JButton("初始化数据");
-        setDefault = new JButton("使用默认参数");
+        setDefault = new JButton("使用默认数据");
 
 
         frame.getContentPane().add(addIns);
@@ -210,11 +213,11 @@ public class MainPanel {
         delIns.setBounds(180, 15, 18, 18);
         addMem.setBounds(160, 210, 18, 18);
         delMem.setBounds(180, 210, 18, 18);
-        setDefault.setBounds(500, 400, 100, 40);
-        stepButton.setBounds(500, 450, 100, 40);
-        runButton.setBounds(500, 500, 100, 40);
-        loadFile.setBounds(650, 400, 100, 40);
-        init.setBounds(650, 450, 100, 40);
+        setDefault.setBounds(400, 350, 100, 40);
+        stepButton.setBounds(400, 510, 100, 40);
+        runButton.setBounds(510, 510, 100, 40);
+        loadFile.setBounds(510, 350, 100, 40);
+        init.setBounds(450, 430, 100, 40);
 
         addIns.addActionListener(al);
         delIns.addActionListener(al);
@@ -225,6 +228,19 @@ public class MainPanel {
         loadFile.addActionListener(al);
         init.addActionListener(al);
         setDefault.addActionListener(al);
+    }
+
+    private void initLabels() {
+        JLabel[] labels = new JLabel[4];
+        for (int i = 0; i < 2; ++i) {
+            for (int j = 0; j < 2; ++j) {
+                labels[i * 2 + j] = new JLabel("↓");
+                frame.getContentPane().add(labels[i * 2 + j]);
+                labels[i * 2 + j].setBounds(460 + j * 70, 400 + i * 80, 20, 20);
+            }
+        }
+        JLabel down = new JLabel("↓");
+
     }
 
     private ActionListener al = new ActionListener() {
@@ -253,11 +269,16 @@ public class MainPanel {
 
             } else if (e.getSource() == addMem) {
                 String str = JOptionPane.showInputDialog("输入内存地址和对应的值，中间用空格分开。\n" +
-                        "如： 5a2 1.22");
+                        "如： 0xfff(3位16进制地址) 1.22(任意数字)");
                 String[] new_data = str.split(" ");
-
-                memTable.addRow(new_data);
-
+                if (isGoodMemory(new_data)) {
+                    memTable.addRow(new_data);
+                } else {
+                    JOptionPane.showMessageDialog(null,
+                            "请输入正确的内存数据！",
+                            "数据错误",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             } else if (e.getSource() == delMem) {
                 String[][] vec = memTable.getData();
                 String[][] new_vec = new String[vec.length - 1][];
@@ -292,15 +313,14 @@ public class MainPanel {
                     error.printStackTrace();
                 }
             } else if (e.getSource() == init) {
-                if (checkLegality()) {
-                    clock.clear();
-                    proState = INITTED;
-                    updateState();
-                    synchronized (adaptor.operation) {
-                        adaptor.operation.set(SharedField.INIT);
-                        adaptor.operation.notify();
-                    }
+                clock.clear();
+                proState = INITTED;
+                updateState();
+                synchronized (adaptor.operation) {
+                    adaptor.operation.set(SharedField.INIT);
+                    adaptor.operation.notify();
                 }
+
             } else if (e.getSource() == setDefault) {
                 initTables(true);
             }
@@ -334,20 +354,19 @@ public class MainPanel {
         return false;
     }
 
-    private boolean checkLegality() {
-        return true;
-    }
-
-    private boolean checkMemLegality(TableModelEvent e) {
-
-        return true;
-    }
-
-    private boolean checkRegLegality(TableModelEvent e) {
-        return true;
-    }
-
-    private boolean checkFuLegality(TableModelEvent e) {
+    private boolean isGoodMemory(String[] data) {
+        if (data.length != 2) return false;
+        if (data[0].length() > 3) return false;
+        for (int i = 0; i < data[0].length(); ++i) {
+            if (data[0].charAt(i) != 'x' && (data[0].charAt(i) - '0' < 0 || data[0].charAt(i) - '9' > 0)) {
+                return false;
+            }
+        }
+        try {
+            float res = Float.parseFloat(data[1]);
+        } catch (Exception e) {
+            return false;
+        }
         return true;
     }
 
