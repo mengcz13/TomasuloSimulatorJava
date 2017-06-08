@@ -68,7 +68,8 @@ public class Adaptor implements Runnable {
      *     <li>INIT: 装载指令列表</li>
      *     <li>STEP: 执行一步，并将输出信息显示在界面上</li>
      *     <li>RUN: 连续执行，并将输出信息显示在界面上</li>
-     *
+     *     <li>SET_MEM / SET_REG: 修改内存/整数寄存器</li>
+     *     <li>TERMINATE: 退出</li>
      * </p>
      */
     public void run() {
