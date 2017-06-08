@@ -17,6 +17,11 @@ import java.util.Vector;
  */
 public class MainPanel {
 
+    private int proState;
+    public static final int SETTING = 0;
+    public static final int INITTED = 1;
+    public static final int RUNNING = 2;
+
     private static final String[][] defaultIns = {{"LD", "F6", "34", "R2"},
             {"LD", "F2", "45", "R3"},
             {"MULD", "F0", "F2", "F4"},
@@ -78,6 +83,8 @@ public class MainPanel {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
 
+        proState = SETTING;
+
         insTable = new DataTable();
         stateTable = new DataTable();
         reserveTable = new DataTable();
@@ -95,11 +102,18 @@ public class MainPanel {
         initTables(false);
         initButtons();
 
+        updateState();
+
         frame.setVisible(true);
     }
 
     public void setAdaptor(Adaptor adaptor) {
         this.adaptor = adaptor;
+    }
+
+    public void terminate() {
+        proState = SETTING;
+        updateState();
     }
 
     private void initTables(boolean isDefault) {
@@ -176,10 +190,10 @@ public class MainPanel {
         addMem = new JButton("+");
         delMem = new JButton("-");
         stepButton = new JButton("单步执行");
-        runButton = new JButton("连续执行");
+        runButton = new JButton("执行到底");
         loadFile = new JButton("读取指令文本");
         init = new JButton("初始化数据");
-        setDefault = new JButton("恢复默认参数");
+        setDefault = new JButton("使用默认参数");
 
 
         frame.getContentPane().add(addIns);
@@ -211,17 +225,23 @@ public class MainPanel {
         loadFile.addActionListener(al);
         init.addActionListener(al);
         setDefault.addActionListener(al);
-
-        stepButton.setEnabled(false);
-        runButton.setEnabled(false);
     }
 
-    public ActionListener al = new ActionListener() {
+    private ActionListener al = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == addIns) {
-                String[] new_data = {"???", "???", "???", "???"};
-                insTable.addRow(new_data);
+                String str = JOptionPane.showInputDialog("输入内存地址和对应的值，中间用空格分开。\n" +
+                        "如： MULD F1 F2 R2");
+                String[] new_data = str.split(" ");
+                if (isGoodInstruction(new_data)) {
+                    insTable.addRow(new_data);
+                } else {
+                    JOptionPane.showMessageDialog(null,
+                            "请输入正确的指令！",
+                            "指令错误",
+                            JOptionPane.ERROR_MESSAGE);
+                }
 
             } else if (e.getSource() == delIns) {
                 String[][] vec = insTable.getData();
@@ -232,7 +252,10 @@ public class MainPanel {
                 insTable.setData(new_vec);
 
             } else if (e.getSource() == addMem) {
-                String[] new_data = {"???", "???"};
+                String str = JOptionPane.showInputDialog("输入内存地址和对应的值，中间用空格分开。\n" +
+                        "如： 5a2 1.22");
+                String[] new_data = str.split(" ");
+
                 memTable.addRow(new_data);
 
             } else if (e.getSource() == delMem) {
@@ -249,6 +272,8 @@ public class MainPanel {
                     adaptor.operation.notify();
                 }
             } else if (e.getSource() == runButton) {
+                proState = RUNNING;
+                updateState();
                 synchronized (adaptor.operation) {
                     adaptor.operation.set(SharedField.RUN);
                     adaptor.operation.notify();
@@ -269,8 +294,8 @@ public class MainPanel {
             } else if (e.getSource() == init) {
                 if (checkLegality()) {
                     clock.clear();
-                    stepButton.setEnabled(true);
-                    runButton.setEnabled(true);
+                    proState = INITTED;
+                    updateState();
                     synchronized (adaptor.operation) {
                         adaptor.operation.set(SharedField.INIT);
                         adaptor.operation.notify();
@@ -282,11 +307,11 @@ public class MainPanel {
         }
     };
 
-    public TableModelListener ml = new TableModelListener() {
+    private TableModelListener ml = new TableModelListener() {
         @Override
         public void tableChanged(TableModelEvent e) {
             System.out.println("listen changed");
-            if (checkMemLegality(e)) {
+            if (proState == INITTED) {
                 synchronized (adaptor.operation) {
                     System.out.println("set mem");
                     adaptor.operation.set(SharedField.SET_MEM);
@@ -357,4 +382,27 @@ public class MainPanel {
         }
         return null;
     }
+
+    private void updateState() {
+        if (proState == SETTING) {
+            stepButton.setEnabled(false);
+            runButton.setEnabled(false);
+            setDefault.setEnabled(true);
+            loadFile.setEnabled(true);
+            init.setEnabled(true);
+        } else if (proState == INITTED) {
+            stepButton.setEnabled(true);
+            runButton.setEnabled(true);
+            setDefault.setEnabled(false);
+            loadFile.setEnabled(false);
+            init.setEnabled(false);
+        } else if (proState == RUNNING) {
+            stepButton.setEnabled(false);
+            runButton.setEnabled(false);
+            setDefault.setEnabled(false);
+            loadFile.setEnabled(false);
+            init.setEnabled(false);
+        }
+    }
+
 }
