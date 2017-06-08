@@ -15,12 +15,21 @@ public class DataTable {
     private String[] header;
     private TableModelListener listener;
     private JLabel label;
+    private boolean added;
 
     public DataTable() {
         table = new JTable();
         label = new JLabel();
         model = new DefaultTableModel();
         table.setModel(model);
+        added = false;
+    }
+
+    public void add() {
+        added = true;
+    }
+    public boolean isAdded() {
+        return added;
     }
 
     public void setHeader(String[] header) {
@@ -43,6 +52,14 @@ public class DataTable {
         }
     }
 
+    public JTable getTable() {
+        return this.table;
+    }
+
+    public JLabel getLabel() {
+        return this.label;
+    }
+
     public String[][] getData() {
         Vector<Vector<String>> vec = model.getDataVector();
         String[][] data = new String[vec.size()][];
@@ -54,18 +71,12 @@ public class DataTable {
             data[i] = sec_data;
         }
         return data;
-
     }
 
     public void clear() {
         while (model.getRowCount() > 0) {
             model.removeRow(0);
         }
-    }
-
-    public JTable table() {
-
-        return this.table;
     }
 
     public void setBounds(int x, int y, int width, int height) {
