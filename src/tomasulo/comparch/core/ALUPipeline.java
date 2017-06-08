@@ -57,11 +57,12 @@ public class ALUPipeline {
                 int laststage = pipeStruct.size();
                 Iterator<ReservationStation> iter = pipeline.iterator();
                 int numInPipe = 0;
-                while (iter.hasNext() && numInPipe <= pipeStruct.size()) {
+                while (iter.hasNext() && numInPipe < pipeStruct.size()) {
                     ReservationStation curr = iter.next();
                     int maxcurr = pipeStruct.get(curr.stage);
                     int hasbeen = OperatorName.busyCountDownMap.get(curr.operatorName) - curr.busyCountDown;
-                    boolean fresh = (hasbeen == 0);
+//                    boolean fresh = (hasbeen == 0);
+                    boolean fresh = (curr.stage == 0);
                     ++hasbeen;
                     --curr.busyCountDown;
                     ++numInPipe;
@@ -78,8 +79,12 @@ public class ALUPipeline {
                             --hasbeen;
                             ++curr.busyCountDown;
                         }
+                    } else {
+                        break;
                     }
                     laststage = curr.stage;
+                    System.out.println("laststage: " + laststage);
+                    System.out.println("numinpipe: " + numInPipe);
                     if (fresh) {
                         curr.inArithm = true;
                         break;
