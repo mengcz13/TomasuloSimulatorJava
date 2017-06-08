@@ -83,7 +83,7 @@ public class Adaptor implements Runnable {
                         }
                         engine.step();
                         collectResult(engine, panelHandle);
-                        if(!engine.checkFinish()) {
+                        if(engine.checkFinish()) {
                             panelHandle.terminate();
                         }
                         break;
