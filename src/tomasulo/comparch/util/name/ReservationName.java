@@ -4,22 +4,38 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * Created by neozero on 17-5-31.
- *
- * Define all kinds of reservation stations.
+ * 模拟保留站。
  */
 public class ReservationName {
 
+    /**
+     * 加法保留站。
+     */
     public static final int ADD = RegisterName.INSTVALUE + 1;
 
+    /**
+     * 乘法保留站。
+     */
     public static final int MULT = ADD + 1;
 
+    /**
+     * Load保留站。
+     */
     public static final int LOAD = MULT + 1;
 
+    /**
+     * Store保留站。
+     */
     public static final int STORE = LOAD + 1;
 
+    /**
+     * 浮点数立即数。
+     */
     public static final int FLOATVALUE = STORE + 1;
 
+    /**
+     * 映射表。
+     */
     public static final Map<Integer, String> reservationNameMap;
 
     static {

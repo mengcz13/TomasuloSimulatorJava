@@ -4,18 +4,33 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 /**
- * Created by neozero on 17-6-6.
+ * 模拟ALU运算部件。
  */
 public class ALUName {
 
+    /**
+     * 加法器。
+     */
     public static final int AddPipe = 0;
 
+    /**
+     * 乘法器。
+     */
     public static final int MulPipe = AddPipe + 1;
 
+    /**
+     * 除法器。
+     */
     public static final int DivPipe = MulPipe + 1;
 
+    /**
+     * load/store部件。
+     */
     public static final int LSPipe = DivPipe + 1;
 
+    /**
+     * 映射表。
+     */
     public static final Map<Integer, Integer> operALUMap;
 
     static {

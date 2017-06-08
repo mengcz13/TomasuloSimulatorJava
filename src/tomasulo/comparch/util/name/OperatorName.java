@@ -4,24 +4,43 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * Created by neozero on 17-5-31.
- *
- * Define all operators.
+ * 模拟算术操作。
  */
 public class OperatorName {
 
+    /**
+     * 加法指令。
+     */
     public static final int ADDD = InstStateName.WRITERESULT + 1;
 
+    /**
+     * 减法指令。
+     */
     public static final int SUBD = ADDD + 1;
 
+    /**
+     * 乘法指令。
+     */
     public static final int MULTD = SUBD + 1;
 
+    /**
+     * 除法指令。
+     */
     public static final int DIVD = MULTD + 1;
 
+    /**
+     * load指令。
+     */
     public static final int LD = DIVD + 1;
 
+    /**
+     * store指令。
+     */
     public static final int ST = LD + 1;
 
+    /**
+     * 映射表。
+     */
     public static final Map<String, Integer> nameOperatorMap;
 
     static {

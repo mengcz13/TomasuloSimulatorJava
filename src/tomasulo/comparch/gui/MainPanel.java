@@ -13,72 +13,178 @@ import java.io.*;
 import java.util.Vector;
 
 /**
- * Created by THU73 on 17/5/30.
+ * 主面板类，负责大部分UI元件的维护与逻辑执行。
  */
 public class MainPanel {
 
+    /**
+     * 当前UI面板的运行状态，方便进行一些UI交互的状态判定。
+     */
     private int proState;
+    /**
+     * 未初始化。
+     */
     public static final int SETTING = 0;
+    /**
+     * 已初始化。
+     */
     public static final int INITTED = 1;
+    /**
+     * 正在连续运行。
+     */
     public static final int RUNNING = 2;
 
+    /**
+     * 默认指令表头。
+     */
     private static final String[][] defaultIns = {{"LD", "F6", "34", "R2"},
             {"LD", "F2", "45", "R3"},
             {"MULD", "F0", "F2", "F4"},
             {"SUBD", "F8", "F6", "F2"},
             {"DIVD", "F10", "F0", "F6"},
             {"ADDD", "F6", "F8", "F2"}};
+    /**
+     * 默认状态表头。
+     */
     private static final String[][] defaultState = {};
+    /**
+     * 默认load表头。
+     */
     private static final String[][] defaultLoad = {{"load0", "NO", "", ""},
             {"load1", "NO", "", ""},
             {"load2", "NO", "", ""}};
+    /**
+     * 默认store表头。
+     */
     private static final String[][] defaultStore = {{"store0", "NO", "", ""},
             {"store1", "NO", "", ""},
             {"store2", "NO", "", ""}};
+    /**
+     * 默认保留站表头。
+     */
     private static final String[][] defaultReserve = {{"", "Add0", "NO", "", ""},
             {"", "Add1", "NO", "", ""},
             {"", "Add2", "NO", "", ""},
             {"", "Mul0", "NO", "", ""},
             {"", "Mul1", "NO", "", ""}};
+    /**
+     * 默认内存表头。
+     */
     private static final String[][] defaultMem = {};
+    /**
+     * 默认整数寄存器表头。
+     */
     private static final String[][] defaultFu = {{"F0", "", ""}, {"F1", "", ""}, {"F2", "", ""}, {"F3", "", ""},
             {"F4", "", ""}, {"F5", "", ""}, {"F6", "", ""}, {"F7", "", ""},
             {"F8", "", ""}, {"F9", "", ""}, {"F10", "", ""}, {"F11", "", ""},
             {"F12", "", ""}, {"F13", "", ""}, {"F14", "", ""}, {"F15", "", ""},
-            {"F16", "", ""}, {"F17", "", ""}, {"F18", "", ""}, {"F19", "", ""},};
+            {"F16", "", ""}, {"F17", "", ""}, {"F18", "", ""}, {"F19", "", ""}};
+    /**
+     * 默认浮点寄存器表头。
+     */
     private static final String[][] defaultRu = {{"R0", ""}, {"R1", ""}, {"R2", ""}, {"R3", ""},
             {"R4", ""}, {"R5", ""}, {"R6", ""}, {"R7", ""},
             {"R8", ""}, {"R9", ""}, {"R10", ""}, {"R11", ""},
             {"R12", ""}, {"R13", ""}, {"R14", ""}, {"R15", ""},
-            {"R16", ""}, {"R17", ""}, {"R18", ""}, {"R19", ""},};
+            {"R16", ""}, {"R17", ""}, {"R18", ""}, {"R19", ""}};
 
+    /**
+     * 主面板。
+     */
     private JFrame frame;
 
+    /**
+     * 指令表格。
+     */
     public DataTable insTable;
+    /**
+     * 状态表格。
+     */
     public DataTable stateTable;
+    /**
+     * 保留站表格。
+     */
     public DataTable reserveTable;
+    /**
+     * 内存表格。
+     */
     public DataTable memTable;
+    /**
+     * load表格。
+     */
     public DataTable loadTable;
+    /**
+     * store表格。
+     */
     public DataTable storeTable;
+    /**
+     * 整数寄存器表格。
+     */
     public DataTable ruTable;
+    /**
+     * 浮点寄存器表格。
+     */
     public DataTable fuTable;
+
+    /**
+     * 计步器。
+     */
     public Clock clock;
 
+    /**
+     * 添加指令按钮。
+     */
     private JButton addIns;
+    /**
+     * 删除指令按钮。
+     */
     private JButton delIns;
+    /**
+     * 添加内存按钮。
+     */
     private JButton addMem;
+    /**
+     * 删除内存按钮。
+     */
     private JButton delMem;
+    /**
+     * 单步执行按钮。
+     */
     private JButton stepButton;
+    /**
+     * 执行到底按钮。
+     */
     private JButton runButton;
+    /**
+     * 读取文件按钮。
+     */
     private JButton loadFile;
+    /**
+     * 应用按钮。
+     */
     private JButton init;
+    /**
+     * 使用默认参数按钮。
+     */
     private JButton setDefault;
+    /**
+     * 连续执行n步按钮。
+     */
     private JButton stepnButton;
+
+    /**
+     * 文本框。（用来输入连续执行的步数）
+     */
     public JTextField textField;
 
+    /**
+     * Adaptor
+     */
     public Adaptor adaptor;
 
-
+    /**
+     * 构造函数。
+     */
     public MainPanel() {
         frame = new JFrame("Tomasulo Demo");
         frame.setLayout(null);
@@ -111,20 +217,36 @@ public class MainPanel {
         frame.setVisible(true);
     }
 
+    /**
+     * 设置Adaptor
+     *
+     * @param adaptor 要设置的Adaptor
+     */
     public void setAdaptor(Adaptor adaptor) {
         this.adaptor = adaptor;
     }
 
+    /**
+     * 终止函数。
+     */
     public void terminate() {
         proState = SETTING;
         updateState();
     }
 
+    /**
+     * 单步终止。
+     */
     public void restoreFree() {
         proState = INITTED;
         updateState();
     }
 
+    /**
+     * 初始化各个表格。
+     *
+     * @param isDefault true:表示第一次初始化, false:表示之后重复初始化
+     */
     private void initTables(boolean isDefault) {
         String[] insColumn = {"ins", "Des", "Src_j", "Src_k"};
         String[][] noDefault = {};
@@ -178,6 +300,18 @@ public class MainPanel {
         insTable.getTable().setEnabled(false);
     }
 
+    /**
+     * 初始化单个表格。
+     *
+     * @param table  要初始化的表格
+     * @param column 要初始化的表头
+     * @param data   要初始化的数据
+     * @param title  初始化的表格标题
+     * @param x      横坐标
+     * @param y      纵坐标
+     * @param width  宽度
+     * @param height 高度
+     */
     private void initTable(DataTable table, String[] column, String[][] data, String title,
                            int x, int y, int width, int height) {
         if (!table.isAdded()) {
@@ -195,6 +329,9 @@ public class MainPanel {
         table.setData(data);
     }
 
+    /**
+     * 初始化按钮。
+     */
     private void initButtons() {
         addIns = new JButton("+");
         delIns = new JButton("-");
@@ -242,6 +379,9 @@ public class MainPanel {
         stepnButton.addActionListener(al);
     }
 
+    /**
+     * 初始化标签。
+     */
     private void initLabels() {
         JLabel[] labels = new JLabel[4];
         for (int i = 0; i < 2; ++i) {
@@ -253,12 +393,18 @@ public class MainPanel {
         }
     }
 
+    /**
+     * 初始化文本框。
+     */
     private void initTextField() {
         textField = new JTextField();
         frame.getContentPane().add(textField);
         textField.setBounds(650, 480, 40, 20);
     }
 
+    /**
+     * 一个监听按钮变化事件的监听类。
+     */
     private ActionListener al = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -360,6 +506,9 @@ public class MainPanel {
         }
     };
 
+    /**
+     * 一个监听按钮变化事件的监听类。
+     */
     private TableModelListener ml = new TableModelListener() {
         @Override
         public void tableChanged(TableModelEvent e) {
@@ -373,6 +522,12 @@ public class MainPanel {
         }
     };
 
+    /**
+     * 测试一条指令是否是合法的指令。
+     *
+     * @param data 指令分割后的数组。
+     * @return 是否合法的boolean值。
+     */
     private boolean isGoodInstruction(String[] data) {
         if (data.length != 4) return false;
         if (data[0].equals("ADDD")
@@ -386,11 +541,21 @@ public class MainPanel {
         return false;
     }
 
+    /**
+     * 测试一项内存数据是否合法。
+     *
+     * @param data 数据分割后的数组。
+     * @return 是否合法的boolean值。
+     */
     private boolean isGoodMemory(String[] data) {
         if (data.length != 2) return false;
         if (data[0].length() > 3) return false;
         for (int i = 0; i < data[0].length(); ++i) {
-            if (data[0].charAt(i) != 'x' && (data[0].charAt(i) - '0' < 0 || data[0].charAt(i) - '9' > 0)) {
+            char cc = data[0].charAt(i);
+            if (cc != 'x' && cc != '0' && cc != '1' && cc != '2' && cc != '3' && cc != '4' &&
+                    cc != '5' && cc != '6' && cc != '7' && cc != '8' && cc != '9' && cc != 'a' &&
+                    cc != 'b' && cc != 'c' && cc != 'd' && cc != 'e' && cc != 'f' && cc != 'A' &&
+                    cc != 'B' && cc != 'C' && cc != 'D' && cc != 'E' && cc != 'F') {
                 return false;
             }
         }
@@ -402,6 +567,12 @@ public class MainPanel {
         return true;
     }
 
+    /**
+     * 读取文件。
+     *
+     * @return String[][] 如果读取成功，返回文件指令内容。
+     * @throws IOException 如果出错，抛出异常，在上一层进行处理。
+     */
     private String[][] loadFileData() throws IOException {
         JFileChooser fc = new JFileChooser();
         fc.setDialogTitle("请选择指令文件");
@@ -434,6 +605,9 @@ public class MainPanel {
         return null;
     }
 
+    /**
+     * 根据当前的state更新各按钮的可用情况。
+     */
     private void updateState() {
         if (proState == SETTING) {
             stepButton.setEnabled(false);

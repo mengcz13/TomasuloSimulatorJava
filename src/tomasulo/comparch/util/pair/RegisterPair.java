@@ -1,7 +1,7 @@
 package tomasulo.comparch.util.pair;
 
 /**
- * Created by neozero on 17-5-31.
+ * 基于KindValuePair实现的寄存器值映射类。
  */
 public class RegisterPair extends KindValuePair {
     public RegisterPair() {

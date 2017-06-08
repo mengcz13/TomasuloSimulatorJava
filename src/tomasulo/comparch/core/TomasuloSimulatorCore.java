@@ -87,6 +87,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 从给定指令序列构造模拟器.
+     *
      * @param instList 给定的指令序列, 模拟器以此初始化自己的指令序列.
      */
     public TomasuloSimulatorCore(List<Instruction> instList) {
@@ -95,8 +96,9 @@ public class TomasuloSimulatorCore {
 
     /**
      * 根据指令序列和内存大小构造模拟器.
+     *
      * @param instList 给定的指令序列, 模拟器以此初始化自己的指令序列.
-     * @param memSize 给定的内存大小.
+     * @param memSize  给定的内存大小.
      */
     public TomasuloSimulatorCore(List<Instruction> instList, int memSize) {
         this.instList = instList;
@@ -154,6 +156,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 设定指令序列.
+     *
      * @param instList 指令序列.
      */
     public void setInstList(List<Instruction> instList) {
@@ -163,6 +166,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 获取指令序列
+     *
      * @return 模拟器当前使用的指令序列.
      */
     public List<Instruction> getInstList() {
@@ -171,9 +175,9 @@ public class TomasuloSimulatorCore {
 
     /**
      * 模拟器进行一次单步执行.
-     *
+     * <p>
      * 执行前检查是否已经完成, 若完成则修改runnable标记.
-     *
+     * <p>
      * 每次执行均增加clock, 重置当前clock内执行的指令的历史记录.
      */
     public void step() {
@@ -208,6 +212,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 每条指令执行完成后会记录完成时的周期数, 以此检查所有指令是否全部完成.
+     *
      * @return 若全部指令已经执行完成则返回True.
      */
     public boolean checkFinish() {
@@ -222,7 +227,8 @@ public class TomasuloSimulatorCore {
 
     /**
      * 修改指定位置的内存值.
-     * @param addr 修改位置的内存地址.
+     *
+     * @param addr     修改位置的内存地址.
      * @param newvalue 需要写入的新内存值.
      */
     private void setMem(int addr, double newvalue) {
@@ -231,6 +237,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 返回指令序列.
+     *
      * @return 指令序列的二维字符串数组. 格式为{{"OP", "R1", "R2", "R3"}}.
      */
     public String[][] getInsTable() {
@@ -244,6 +251,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 设置指令序列.
+     *
      * @param insTable 指令序列的二维字符串数组. 格式为{{"OP", "R1", "R2", "R3"}}.
      */
     public void setInsTable(String[][] insTable) {
@@ -258,6 +266,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 返回指令执行历史记录.
+     *
      * @return 指令执行历史记录的二维字符串数组. 格式为{{"ISSUE", "EXEC", "WRITEBACK"}}.
      */
     public String[][] getStateTable() {
@@ -270,6 +279,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 返回Add和Mul操作的Reservation Station.
+     *
      * @return Reservation Station的二维字符串数组. 格式为{{"time", "name", "busy", "operation", "Vi", "Vj", "Qi", "Qj"}}.
      */
     public String[][] getReserveTable() {
@@ -287,6 +297,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 返回指令序列中涉及到的内存地址的信息.
+     *
      * @return 内存地址和数据的字符串二维数组. 格式为{{"16进制地址", "浮点数"}}.
      */
     public String[][] getMemTable() {
@@ -302,6 +313,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 设置指定位置的内存值.
+     *
      * @param memTable 内存地址和数据的字符串二维数组. 格式为{{"16进制地址", "浮点数"}}.
      */
     public void setMemTable(String[][] memTable) {
@@ -320,6 +332,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 返回Load操作的Reservation Station.
+     *
      * @return Reservation Station的二维字符串数组. 格式为{{"name", "busy", "address", "cache"}}.
      */
     public String[][] getLoadTable() {
@@ -333,6 +346,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 返回Store操作的Reservation Station.
+     *
      * @return Reservation Station的二维字符串数组. 格式为{{"name", "busy", "address", "cache"}}.
      */
     public String[][] getStoreTable() {
@@ -346,6 +360,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 返回整数寄存器.
+     *
      * @return 二维字符串数组. 格式为{{"name", "value"}}.
      */
     public String[][] getRuTable() {
@@ -360,6 +375,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 设置整数寄存器.
+     *
      * @param ruTable 二维字符串数组. 格式为{{"name", "value"}}.
      */
     public void setRuTable(String[][] ruTable) {
@@ -373,6 +389,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * 返回浮点寄存器.
+     *
      * @return 二维字符串数组. 格式为{{"name", "value"}}.
      */
     public String[][] getFuTable() {
@@ -391,14 +408,15 @@ public class TomasuloSimulatorCore {
     }
 
     /**
-     * Issue部分模拟, 具体流程如下:
-     *
-     * 1. 对于每条指令, 寻找对应的Reservation Station中是否有空闲位置, 没有则返回, 否则继续.
-     * 2. 解析指令, 将源操作数和目的操作数分配到Reservation Station的对应位置, 设置好Reservation Station的信息.
-     * 3. 将该Reservation Station加入waitingList.
-     *
-     * 这里利用了Java对于复杂结构传递引用的特性, 每个Reservation Station中的源操作数均为对其他Station的引用.
-     * 对于计算完成的Station, 存放的实际为具体的浮点数, 实现时, 若有新的指令需要使用该位置, 可以直接将其替换为新构造的Station, 即使有其他位置引用了该浮点数, 引用关系也不变.
+     * Issue部分模拟。
+     * 具体流程如下:<br>
+     * <br>
+     * 1. 对于每条指令, 寻找对应的Reservation Station中是否有空闲位置, 没有则返回, 否则继续.<br>
+     * 2. 解析指令, 将源操作数和目的操作数分配到Reservation Station的对应位置, 设置好Reservation Station的信息.<br>
+     * 3. 将该Reservation Station加入waitingList.<br>
+     * <br>
+     * 这里利用了Java对于复杂结构传递引用的特性, 每个Reservation Station中的源操作数均为对其他Station的引用.<br>
+     * 对于计算完成的Station, 存放的实际为具体的浮点数, 实现时, 若有新的指令需要使用该位置, 可以直接将其替换为新构造的Station, 即使有其他位置引用了该浮点数, 引用关系也不变.<br>
      */
     private void issue() {
         if (pc < instList.size()) {
@@ -457,10 +475,10 @@ public class TomasuloSimulatorCore {
 
     /**
      * EXEC部分模拟, 具体流程如下:
-     *
-     * 1. 对于所有的等待队列, 从前到后检测操作数是否已经准备好. 该队列按照指令Issue的顺序排列, FIFO.
-     * 2. 将Reservation Station送入流水线.
-     * 3. 取出流水线计算完成的Reservation Station, 实际计算出具体数值, 并对其对应的指令标记"本clock中已执行过".
+     * <p>
+     * 1. 对于所有的等待队列, 从前到后检测操作数是否已经准备好. 该队列按照指令Issue的顺序排列, FIFO.<br>
+     * 2. 将Reservation Station送入流水线.<br>
+     * 3. 取出流水线计算完成的Reservation Station, 实际计算出具体数值, 并对其对应的指令标记"本clock中已执行过".<br>
      */
     private void compExec() {
         // 对于所有的等待队列, 从前到后检测操作数是否已经准备好
@@ -527,7 +545,7 @@ public class TomasuloSimulatorCore {
 
     /**
      * WRITEBACK部分模拟, 具体流程如下:
-     *
+     * <p>
      * 只需要修改Reservation Station的状态即可, 由于Java传递引用的特性, 对应位置的值会自动变化.
      */
     private void writeBack() {

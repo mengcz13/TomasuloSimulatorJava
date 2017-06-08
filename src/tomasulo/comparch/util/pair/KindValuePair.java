@@ -1,7 +1,7 @@
 package tomasulo.comparch.util.pair;
 
 /**
- * Created by neozero on 17-5-31.
+ * 模拟一种映射关系。
  */
 public class KindValuePair {
 

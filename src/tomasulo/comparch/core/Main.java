@@ -7,14 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by neozero on 17-6-1.
+ * Main函数入口。
  */
-public class Test {
+public class Main {
 
     public static void main(String[] args) {
         MainPanel panel = new MainPanel();
-        ArrayList<String> al = new ArrayList<>();
-        Adaptor ad = new Adaptor(panel, al);
+        Adaptor ad = new Adaptor(panel);
 
         Thread thread = new Thread(ad);
         thread.start();

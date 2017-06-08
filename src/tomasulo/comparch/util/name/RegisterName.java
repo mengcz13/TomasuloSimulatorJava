@@ -4,14 +4,23 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * Created by neozero on 17-5-31.
+ * 模拟寄存器。
  */
 public class RegisterName {
 
+    /**
+     * 浮点寄存器。
+     */
     public static final int FLOAT = OperatorName.ST + 1;
 
+    /**
+     * 整数寄存器。
+     */
     public static final int INT = FLOAT + 1;
 
+    /**
+     * 立即数。
+     */
     public static final int INSTVALUE = INT + 1;
 
     public static final Map<String, Integer> registerNameMap;

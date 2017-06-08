@@ -1,0 +1,6 @@
+tomasulo.comparch.adaptor
+tomasulo.comparch.core
+tomasulo.comparch.gui
+tomasulo.comparch.util.multithread
+tomasulo.comparch.util.name
+tomasulo.comparch.util.pair

@@ -11,8 +11,14 @@ import tomasulo.comparch.util.name.OperatorName;
  */
 public class ALUPipeline {
 
+    /**
+     * 保留站的映射表。
+     */
     private Map<Integer, LinkedList<ReservationStation>> aluList;
 
+    /**
+     * 构造函数。
+     */
     public ALUPipeline() {
         aluList = new HashMap<>();
         for (Integer aluname : ALUName.pipeStruct.keySet()) {
@@ -20,6 +26,10 @@ public class ALUPipeline {
         }
     }
 
+    /**
+     * 添加一个保留站到流水线中。
+     * @param res 要添加的保留站。
+     */
     public void add(ReservationStation res) {
         assert res.busyCountDown == OperatorName.busyCountDownMap.get(res.operatorName);
         res.stage = 0;
@@ -29,9 +39,9 @@ public class ALUPipeline {
     /**
      * 模拟一个clock中的流水线行为.
      *
-     * 由于流水线中的保留站采用FIFO组织, 故对于每一条流水线从前到后扫描一次即可完成处理, 具体方法如下:
-     * 尝试执行当前的保留站一拍, 若所处stage不变则继续, 若改变则判断下一个stage是否被占据, 不被占据时才能前进, 否则恢复原状态.
-     * 具体实现中, 链表内除了进入流水线的保留站外还有等待进入者, 因此需要根据流水线段数控制循环, 同时注意每条流水线每次最多新进入一条指令,
+     * 由于流水线中的保留站采用FIFO组织, 故对于每一条流水线从前到后扫描一次即可完成处理, 具体方法如下:<br>
+     * 尝试执行当前的保留站一拍, 若所处stage不变则继续, 若改变则判断下一个stage是否被占据, 不被占据时才能前进, 否则恢复原状态.<br>
+     * 具体实现中, 链表内除了进入流水线的保留站外还有等待进入者, 因此需要根据流水线段数控制循环, 同时注意每条流水线每次最多新进入一条指令,<br>
      *
      * 对于未设置流水线的情况, 直接将countdown-1即可.
      *
